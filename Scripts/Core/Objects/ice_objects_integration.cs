@@ -242,13 +242,13 @@ namespace ICE.World.Objects
 			#if TPC
 
 			Vector3 _position = ( _damage_point == Vector3.zero ? _target.transform.position : _damage_point ); 
-			Vector3 _direction = _sender.transform.position - _target.transform.position;
+			Vector3 _direction = _sender.transform.position - _position;
 			_direction.Normalize();
 
 			Opsive.ThirdPersonController.Health _health = _target.GetComponentInParent<Opsive.ThirdPersonController.Health>();
 			if( _health != null )
 			{
-			_health.Damage( _damage, _position, _direction.normalized * _force, _sender, _target );
+				_health.Damage( _damage, _position, ( _force_type != DamageForceType.None ? _direction.normalized * _force : Vector3.zero ) , _sender, _target );
 			_handled = true;
 			}
 

@@ -46,7 +46,7 @@ namespace ICE.Integration.Menus
 			{
 				foreach( ICEWorldEntity _entity in _entities )
 				{
-					if( _entity.GetComponent<ICEWorldAdapter>() == null )
+					if( _entity.EntityType != ICE.World.EnumTypes.EntityClassType.Player && _entity.GetComponent<ICEWorldAdapter>() == null )
 						_entity.gameObject.AddComponent<ICEWorldAdapter>();						
 				}
 			}
@@ -78,6 +78,7 @@ namespace ICE.Integration.Menus
 		}
 
 		// UNITZ
+		#if UNITZ
 		[MenuItem ( "ICE/ICE Integration/UnitZ/Adapt UnitZ Scripts", false, 8112 )]
 		static void AdaptUNITZScripts() 
 		{
@@ -99,7 +100,7 @@ namespace ICE.Integration.Menus
 					Debug.Log( "Virtual modifier for ApplyDamage already exists in '" + _file + "'"  );
 			}
 		}
-
+		/*
 		[MenuItem ( "ICE/ICE Integration/UnitZ/Adapt UnitZ Scripts", true)]
 		static bool ValidateUNITZ(){
 			#if UNITZ
@@ -107,9 +108,11 @@ namespace ICE.Integration.Menus
 			#else
 			return false;
 			#endif
-		}
-
+		}*/
+		#endif
+	
 		// RFPSP
+		#if RFPSP
 		[MenuItem ( "ICE/ICE Integration/RFPSP/Adapt RFPSP Scripts", false, 8112 )]
 		static void AdaptRFPSPScripts() 
 		{
@@ -260,5 +263,6 @@ namespace ICE.Integration.Menus
 			return false;
 			#endif
 		}
+		#endif
 	}
 }

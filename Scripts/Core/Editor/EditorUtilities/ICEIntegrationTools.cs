@@ -48,8 +48,8 @@ namespace ICE.Integration.Menus
 		/// </summary>
 		private static List<AssetDefine> m_CustomDefines = new List<AssetDefine>
 		{
-			new AssetDefine("ICEWorldBehaviour.cs", "", true, null, "ICE" ),
-			new AssetDefine("ICECreatureControl.cs", "", true, null, "ICECC" ),
+			/*new AssetDefine("ICEWorldBehaviour.cs", "", true, null, "ICE" ),
+			new AssetDefine("ICECreatureControl.cs", "", true, null, "ICECC" ),*/
 			new AssetDefine("Health.cs", "namespace Opsive.ThirdPersonController", true, null, "TPC" ),
 			new AssetDefine("vp_DamageHandler.cs", "", true, null, "UFPS" ),
 			new AssetDefine("CharacterDamage.cs", "", true, null, "RFPSP" ),
@@ -150,7 +150,8 @@ namespace ICE.Integration.Menus
 		/// <param name="targetGroups">platforms to add this for (null will add to all platforms)</param>
 		public static void AddCompileDefine( string _new_define_compile_constant, BuildTargetGroup[] _target_groups = null )
 		{
-			
+			Debug.Log( "Found '" + _new_define_compile_constant + "'" );
+
 			if( _target_groups == null )
 				_target_groups = (BuildTargetGroup[])Enum.GetValues(typeof(BuildTargetGroup));
 
