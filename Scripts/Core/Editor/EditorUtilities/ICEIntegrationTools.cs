@@ -164,7 +164,7 @@ namespace ICE.Integration.Menus
 
 				if( ! _defines.Contains( _new_define_compile_constant ) )
 				{
-					Debug.Log( "Add '" + _defines + "' defines for BuildTargetGroup '" + _group.ToString() + "'" );
+					Debug.Log( "Add new define '" + _new_define_compile_constant + "' for BuildTargetGroup '" + _group.ToString() + "'" );
 
 					//if the list is empty, we don't need to append a semicolon first
 					if( _defines.Length > 0 )         
@@ -176,7 +176,7 @@ namespace ICE.Integration.Menus
 					try {
 						PlayerSettings.SetScriptingDefineSymbolsForGroup( _group, _defines );
 					} catch {
-						Debug.Log( "Can't add defines for BuildTargetGroup '" + _group.ToString() + "'" );
+						Debug.Log( "Can't add define '" + _new_define_compile_constant + "' for BuildTargetGroup '" + _group.ToString() + "'" );
 					}
 
 				}
@@ -197,7 +197,7 @@ namespace ICE.Integration.Menus
 			{
 				string _defines = PlayerSettings.GetScriptingDefineSymbolsForGroup( _group );
 
-				Debug.Log( "Remove '" + _define_compile_constant + "' defines for BuildTargetGroup '" + _group.ToString() + "'" );
+				Debug.Log( "Remove custom define '" + _define_compile_constant + "' define for BuildTargetGroup '" + _group.ToString() + "'" );
 
 				int _index = _defines.IndexOf( _define_compile_constant );
 				if( _index < 0 )
@@ -215,7 +215,7 @@ namespace ICE.Integration.Menus
 				try {
 					PlayerSettings.SetScriptingDefineSymbolsForGroup( _group, _defines );
 				} catch {
-					Debug.Log( "Can't remove defines for BuildTargetGroup '" + _group.ToString() + "'" );
+					Debug.Log( "Can't remove define '" + _define_compile_constant + "' for BuildTargetGroup '" + _group.ToString() + "'" );
 				}
 
 			}

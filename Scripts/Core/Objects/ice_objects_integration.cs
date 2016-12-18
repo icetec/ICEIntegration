@@ -123,10 +123,10 @@ namespace ICE.World.Objects
 			}else if(_target.GetComponent<BreakableObject>()){
 			_target.GetComponent<BreakableObject>().ApplyDamage( _damage );
 			_handled = true;
-			}else if(_target.GetComponent<ExplosiveObject>()){
+			}/*else if(_target.GetComponent<ExplosiveObject>()){
 			_target.GetComponent<ExplosiveObject>().ApplyDamage( _damage );
 			_handled = true;
-			}else if(_target.GetComponent<MineExplosion>()){
+			}*/else if(_target.GetComponent<MineExplosion>()){
 			_target.GetComponent<MineExplosion>().ApplyDamage( _damage );
 			_handled = true;
 			}

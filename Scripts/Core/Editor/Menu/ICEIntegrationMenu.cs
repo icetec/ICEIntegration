@@ -38,7 +38,7 @@ namespace ICE.Integration.Menus
 			ICEIntegrationTools.ValidateDefines();
 		}
 
-		[MenuItem ("ICE/ICE Integration/Add Integration Adapters", false, 8001 )]
+		[MenuItem ("ICE/ICE Integration/Add Integration Adapters", false, 8022 )]
 		static void AddIntegrationAdapters(){
 
 			ICEWorldEntity[] _entities = GameObject.FindObjectsOfType<ICEWorldEntity>();
@@ -53,7 +53,16 @@ namespace ICE.Integration.Menus
 
 		}
 
-		[MenuItem ("ICE/ICE Integration/Remove Integration Adapters", false, 8001 )]
+		[MenuItem ( "ICE/ICE Integration/Add Integration Adapters", true)]
+		static bool ValidateAddIntegrationAdapters(){
+			#if UNITZ || UFPS || TPC 
+			return true;
+			#else
+			return false;
+			#endif
+		}
+
+		[MenuItem ("ICE/ICE Integration/Remove Integration Adapters", false, 8022 )]
 		static void RemoveIntegrationAdapters(){
 
 			ICEWorldEntity[] _entities = GameObject.FindObjectsOfType<ICEWorldEntity>();
@@ -95,6 +104,158 @@ namespace ICE.Integration.Menus
 		static bool ValidateUNITZ(){
 			#if UNITZ
 			return true;
+			#else
+			return false;
+			#endif
+		}
+
+		// RFPSP
+		[MenuItem ( "ICE/ICE Integration/RFPSP/Adapt RFPSP Scripts", false, 8112 )]
+		static void AdaptRFPSPScripts() 
+		{
+			{
+				string _text = File.ReadAllText("Assets/RFPSP/Scripts/Weapons/WeaponBehavior.cs");
+				if( ! _text.Contains( "BEGIN ICE DAMAGE - MODIFIED BY ICE" ) )
+				{
+					int _start_pos = _text.IndexOf( "case 13://hit object is an NPC" );
+					if( _start_pos > 0 )
+					{
+						int _end_pos = _text.IndexOf( "break;", _start_pos );
+						if( _end_pos > _start_pos )
+						{
+							int _insert_pos = _end_pos;
+
+							string _insert_str = "" +
+								"\n\t\t\t// BEGIN ICE DAMAGE - MODIFIED BY ICE" +
+								"\n\t\t\tif( hit.collider.gameObject.GetComponentInParent<ICE.World.ICEWorldEntity>() ){" +
+								"\n\t\t\t\thit.collider.gameObject.GetComponentInParent<ICE.World.ICEWorldEntity>().AddDamage( damageAmt, directionArg, mainCamTransform.position, myTransform, 0 );" +
+								"\n\t\t\t\tFPSPlayerComponent.UpdateHitTime();//used for hitmarker" +
+								"\n\t\t\t}" +								
+								"\n\t\t\t// END ICE DAMAGE - MODIFIED BY ICE" +
+								"\n\t\t\t";
+							_text = _text.Insert( _insert_pos, _insert_str );
+
+							Debug.Log( "Insert ICE damage handling for layer 13 (NPCs) in Assets/RFPSP/Scripts/Weapons/WeaponBehavior.cs"  ); 
+							File.WriteAllText( "Assets/RFPSP/Scripts/Weapons/WeaponBehavior.cs", _text );
+						}
+					}
+				}
+				else
+					Debug.Log( "ICE damage handling for layer 13 (NPCs) already exists in Assets/RFPSP/Scripts/Weapons/WeaponBehavior.cs"  );
+			}
+
+			{
+				string _text = File.ReadAllText("Assets/RFPSP/Scripts/Weapons/ArrowObject.cs");
+				if( ! _text.Contains( "BEGIN ICE DAMAGE - MODIFIED BY ICE" ) )
+				{
+					int _start_pos = _text.IndexOf( "case 13://hit object is an NPC" );
+					if( _start_pos > 0 )
+					{
+						int _end_pos = _text.IndexOf( "break;", _start_pos );
+						if( _end_pos > _start_pos )
+						{
+							int _insert_pos = _end_pos;
+
+							string _insert_str = "" +
+								"\n\t\t\t\t// BEGIN ICE DAMAGE - MODIFIED BY ICE" +
+								"\n\t\t\t\tif( hitCol.gameObject.GetComponentInParent<ICE.World.ICEWorldEntity>() ){" +
+								"\n\t\t\t\t\thitCol.gameObject.GetComponentInParent<ICE.World.ICEWorldEntity>().AddDamage( damage + damageAddAmt, transform.forward,  Camera.main.transform.position, transform, 0 );" +
+								"\n\t\t\t\t\tFPSPlayerComponent.UpdateHitTime();//used for hitmarker" +
+								"\n\t\t\t\t}" +								
+								"\n\t\t\t\t// END ICE DAMAGE - MODIFIED BY ICE" +
+								"\n\t\t\t\t";
+							_text = _text.Insert( _insert_pos, _insert_str );
+
+							Debug.Log( "Insert ICE damage handling for layer 13 (NPCs) in Assets/RFPSP/Scripts/Weapons/ArrowObject.cs"  ); 
+							File.WriteAllText( "Assets/RFPSP/Scripts/Weapons/ArrowObject.cs", _text );
+						}
+					}
+				}
+				else
+					Debug.Log( "ICE damage handling for layer 13 (NPCs) already exists in Assets/RFPSP/Scripts/Weapons/ArrowObject.cs"  );
+			}
+
+			{
+				string _text = File.ReadAllText("Assets/RFPSP/Scripts/Objects/!Destructibles/ExplosiveObject.cs");
+				if( ! _text.Contains( "BEGIN ICE DAMAGE - MODIFIED BY ICE" ) )
+				{
+					int _start_pos = _text.IndexOf( "case 13://hit object is an NPC" );
+					if( _start_pos > 0 )
+					{
+						int _end_pos = _text.IndexOf( "break;", _start_pos );
+						if( _end_pos > _start_pos )
+						{
+							int _insert_pos = _end_pos;
+
+							string _insert_str = "" +
+								"\n\t\t\t\t\t\t\t// BEGIN ICE DAMAGE - MODIFIED BY ICE" +
+								"\n\t\t\t\t\t\t\tif( hitCollider.gameObject.GetComponentInParent<ICE.World.ICEWorldEntity>() ){" +
+								"\n\t\t\t\t\t\t\t\thitCollider.gameObject.GetComponentInParent<ICE.World.ICEWorldEntity>().AddDamage( explosionDamageAmt, Vector3.zero, myTransform.position, myTransform, 0 );" +
+								"\n\t\t\t\t\t\t\t}" +								
+								"\n\t\t\t\t\t\t\t// END ICE DAMAGE - MODIFIED BY ICE" +
+								"\n\t\t\t\t\t\t\t";
+							_text = _text.Insert( _insert_pos, _insert_str );
+
+							Debug.Log( "Insert ICE damage handling for layer 13 (NPCs) in Assets/RFPSP/Scripts/Objects/!Destructibles/ExplosiveObject.cs"  ); 
+							File.WriteAllText( "Assets/RFPSP/Scripts/Objects/!Destructibles/ExplosiveObject.cs", _text );
+						}
+					}
+				}
+				else
+					Debug.Log( "ICE damage handling for layer 13 (NPCs) already exists in Assets/RFPSP/Scripts/Objects/!Destructibles/ExplosiveObject.cs"  );
+			}
+
+			{
+				string _text = File.ReadAllText("Assets/RFPSP/Scripts/Objects/!Destructibles/MineExplosion.cs");
+				if( ! _text.Contains( "BEGIN ICE DAMAGE - MODIFIED BY ICE" ) )
+				{
+					int _start_pos = _text.IndexOf( "case 13://hit object is an NPC" );
+					if( _start_pos > 0 )
+					{
+						int _end_pos = _text.IndexOf( "break;", _start_pos );
+						if( _end_pos > _start_pos )
+						{
+							int _insert_pos = _end_pos;
+
+							string _insert_str = "" +
+								"\n\t\t\t\t\t\t// BEGIN ICE DAMAGE - MODIFIED BY ICE" +
+								"\n\t\t\t\t\t\tif( hitColliders[i].GetComponent<Collider>().GetComponentInParent<ICE.World.ICEWorldEntity>() ){" +
+								"\n\t\t\t\t\t\t\thitColliders[i].GetComponent<Collider>().GetComponentInParent<ICE.World.ICEWorldEntity>().AddDamage( explosionDamage, Vector3.zero, myTransform.position, null, 0 );" +
+								"\n\t\t\t\t\t\t}" +								
+								"\n\t\t\t\t\t\t// END ICE DAMAGE - MODIFIED BY ICE" +
+								"\n\t\t\t\t\t\t";
+							_text = _text.Insert( _insert_pos, _insert_str );
+
+							Debug.Log( "Insert ICE damage handling for layer 13 (NPCs) in Assets/RFPSP/Scripts/Objects/!Destructibles/MineExplosion.cs"  ); 
+							File.WriteAllText( "Assets/RFPSP/Scripts/Objects/!Destructibles/MineExplosion.cs", _text );
+						}
+					}
+				}
+				else
+					Debug.Log( "ICE damage handling for layer 13 (NPCs) already exists in Assets/RFPSP/Scripts/Objects/!Destructibles/MineExplosion.cs"  );
+			}
+		}
+
+		[MenuItem ( "ICE/ICE Integration/RFPSP/Adapt RFPSP Scripts", true)]
+		static bool ValidateAdaptRFPSPScripts() {
+			#if RFPSP
+			string _text = File.ReadAllText("Assets/RFPSP/Scripts/Weapons/WeaponBehavior.cs");
+			if( ! _text.Contains( "BEGIN ICE DAMAGE - MODIFIED BY ICE" ) )
+				return true;
+
+			_text = File.ReadAllText("Assets/RFPSP/Scripts/Weapons/ArrowObject.cs");
+			if( ! _text.Contains( "BEGIN ICE DAMAGE - MODIFIED BY ICE" ) )
+				return true;
+
+			_text = File.ReadAllText("Assets/RFPSP/Scripts/Objects/!Destructibles/ExplosiveObject.cs");
+			if( ! _text.Contains( "BEGIN ICE DAMAGE - MODIFIED BY ICE" ) )
+				return true;
+
+			_text = File.ReadAllText("Assets/RFPSP/Scripts/Objects/!Destructibles/MineExplosion.cs");
+			if( ! _text.Contains( "BEGIN ICE DAMAGE - MODIFIED BY ICE" ) )
+				return true;
+
+			return false;
 			#else
 			return false;
 			#endif
