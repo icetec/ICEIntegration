@@ -48,8 +48,9 @@ namespace ICE.Integration.Menus
 		/// </summary>
 		private static List<AssetDefine> m_CustomDefines = new List<AssetDefine>
 		{
-			/*new AssetDefine("ICEWorldBehaviour.cs", "", true, null, "ICE" ),
-			new AssetDefine("ICECreatureControl.cs", "", true, null, "ICECC" ),*/
+			/*new AssetDefine("ICEWorldBehaviour.cs", "", true, null, "ICE" ),*/
+			new AssetDefine("ICECreatureControl.cs", "", true, null, "ICECC" ),
+			new AssetDefine("PlayMakerEditor.dll", "", true, null, "PLAYMAKER" ),
 			new AssetDefine("Health.cs", "namespace Opsive.ThirdPersonController", true, null, "TPC" ),
 			new AssetDefine("vp_DamageHandler.cs", "", true, null, "UFPS" ),
 			new AssetDefine("CharacterDamage.cs", "", true, null, "RFPSP" ),
