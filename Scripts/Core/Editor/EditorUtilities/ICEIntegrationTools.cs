@@ -53,6 +53,7 @@ namespace ICE.Integration.Menus
 			new AssetDefine("ICEEnvironment.cs", "", true, null, "ICE_ENV" ),
 			new AssetDefine("AstarPath.cs", "", true, null, "ICE_ASTAR" ),
 			new AssetDefine("PlayMakerEditor.dll", "", true, null, "ICE_PLAYMAKER" ),
+			new AssetDefine("UniStormWeatherSystem_C.cs", "", true, null, "ICE_UNISTORM" ),
 			new AssetDefine("Health.cs", "namespace Opsive.ThirdPersonController", true, null, "ICE_OPSIVE_TPC" ),
 			new AssetDefine("vp_DamageHandler.cs", "", true, null, "ICE_UFPS" ),
 			new AssetDefine("CharacterDamage.cs", "", true, null, "ICE_RFPSP" ),
