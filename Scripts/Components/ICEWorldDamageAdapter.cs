@@ -162,6 +162,24 @@ namespace ICE.Integration.Adapter
 		}
 
 	}
+#elif ICE_EASY_WEAPONS
+	[RequireComponent(typeof(ICEWorldEntity))]
+	public class ICEWorldDamageAdapter : ICEWorldBehaviour {
+
+		protected ICEWorldEntity m_Entity = null;
+		public ICEWorldEntity Entity{
+		get{ return m_Entity = ( m_Entity == null ? ICEWorldEntity.GetWorldEntity( this.gameObject ) : m_Entity ); }
+		}
+
+		public void ChangeHealth( float _damage )
+		{
+			if( Entity == null )
+				return;
+
+			Entity.ApplyDamage( _damage * (-1) );
+		}
+	}
+
 #else
 	public class ICEWorldDamageAdapter : ICEWorldBehaviour{}
 #endif

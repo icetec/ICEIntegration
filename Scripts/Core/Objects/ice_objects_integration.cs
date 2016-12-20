@@ -60,6 +60,8 @@ namespace ICE.Integration.Objects
 			_handled = TryTPCDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#elif ICE_UNITZ
 			_handled = TryUnitZDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
+			#elif ICE_EASY_WEAPONS
+			_handled = TryEasyWeaponsDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#endif
 		
 			return _handled;
@@ -261,6 +263,47 @@ namespace ICE.Integration.Objects
 				_direction.Normalize();
 
 				_damage_manager.ApplyDamage( Mathf.RoundToInt( _damage ), _direction, "", "" );
+				_handled = true;
+			}
+
+			#endif
+
+			return _handled;
+		}
+
+		/// <summary>
+		/// Tries to handle EasyWeapons damage.
+		/// </summary>
+		/// <returns><c>true</c>, if easy weapons damage was tryed, <c>false</c> otherwise.</returns>
+		/// <param name="_sender">Sender.</param>
+		/// <param name="_target">Target.</param>
+		/// <param name="_impact_type">Impact type.</param>
+		/// <param name="_damage">Damage.</param>
+		/// <param name="_damage_method">Damage method.</param>
+		/// <param name="_damage_point">Damage point.</param>
+		/// <param name="_force_type">Force type.</param>
+		/// <param name="_force">Force.</param>
+		private static bool TryEasyWeaponsDamage( GameObject _sender, GameObject _target, DamageTransferType _impact_type, float _damage, string _damage_method, Vector3 _damage_point, DamageForceType _force_type, float _force )
+		{
+			if( _target == null || _sender == null || _target == _sender )
+				return false;
+
+			bool _handled = false;
+
+			#if ICE_EASY_WEAPONS
+
+			Health _health = _target.GetComponent<Health>(); 
+			if( _health != null )
+				_health = _target.GetComponentInParent<Health> ();
+
+			if( _health != null )
+			{
+				_health.ChangeHealth( - _damage );
+				_handled = true;
+			}
+			else
+			{
+				_target.SendMessageUpwards( "ChangeHealth", - _damage, SendMessageOptions.DontRequireReceiver);
 				_handled = true;
 			}
 
