@@ -33,8 +33,8 @@ namespace ICE.Integration.Menus
 	public class ICEIntegrationDamageMenu : MonoBehaviour {
 
 
-		// DAMAGE ADAPTERS
-		[MenuItem ("ICE/ICE Integration/Add Damage Adapters", false, 8022 )]
+		// ADD DAMAGE ADAPTERS
+		[MenuItem ("ICE/ICE Integration/Damage/Add Damage Adapters", false, 8022 )]
 		static void AddDamageAdapters(){
 
 			ICEWorldEntity[] _entities = GameObject.FindObjectsOfType<ICEWorldEntity>();
@@ -42,14 +42,14 @@ namespace ICE.Integration.Menus
 			{
 				foreach( ICEWorldEntity _entity in _entities )
 				{
-					if( _entity.EntityType != ICE.World.EnumTypes.EntityClassType.Player && _entity.GetComponent<ICEWorldAdapter>() == null )
-						_entity.gameObject.AddComponent<ICEWorldAdapter>();						
+					if( _entity.EntityType != ICE.World.EnumTypes.EntityClassType.Player && _entity.GetComponent<ICEWorldDamageAdapter>() == null )
+						_entity.gameObject.AddComponent<ICEWorldDamageAdapter>();						
 				}
 			}
 
 		}
 
-		[MenuItem ( "ICE/ICE Integration/Add Damage Adapters", true)]
+		[MenuItem ( "ICE/ICE Integration/Damage/Add Damage Adapters", true)]
 		static bool ValidateAddDamageAdapters(){
 			#if ICE_UNITZ || ICE_UFPS || ICE_OPSIVE_TPC 
 			return true;
@@ -58,7 +58,8 @@ namespace ICE.Integration.Menus
 			#endif
 		}
 
-		[MenuItem ("ICE/ICE Integration/Remove Damage Adapters", false, 8022 )]
+		// REMOVE DAMAGE ADAPTERS
+		[MenuItem ("ICE/ICE Integration/Damage/Remove Damage Adapters", false, 8022 )]
 		static void RemoveDamageAdapters(){
 
 			ICEWorldEntity[] _entities = GameObject.FindObjectsOfType<ICEWorldEntity>();
@@ -66,14 +67,14 @@ namespace ICE.Integration.Menus
 			{
 				foreach( ICEWorldEntity _entity in _entities )
 				{
-					if( _entity.GetComponent<ICEWorldAdapter>() != null )
-						GameObject.DestroyImmediate( _entity.GetComponent<ICEWorldAdapter>() );						
+					if( _entity.GetComponent<ICEWorldDamageAdapter>() != null )
+						GameObject.DestroyImmediate( _entity.GetComponent<ICEWorldDamageAdapter>() );						
 				}
 			}
 
 		}
 
-		[MenuItem ( "ICE/ICE Integration/Remove Damage Adapters", true)]
+		[MenuItem ( "ICE/ICE Integration/Damage/Remove Damage Adapters", true)]
 		static bool ValidateRemoveDamageAdapters(){
 			#if ICE_UNITZ || ICE_UFPS || ICE_OPSIVE_TPC 
 			return true;
@@ -84,7 +85,7 @@ namespace ICE.Integration.Menus
 
 		// UNITZ
 		#if ICE_UNITZ
-		[MenuItem ( "ICE/ICE Integration/UnitZ/Adapt UnitZ Scripts", false, 8112 )]
+		[MenuItem ( "ICE/ICE Integration/Damage/UnitZ/Adapt UnitZ Scripts", false, 8033 )]
 		static void AdaptUNITZScripts() 
 		{
 			{
@@ -118,7 +119,7 @@ namespace ICE.Integration.Menus
 	
 		// RFPSP
 		#if ICE_RFPSP
-		[MenuItem ( "ICE/ICE Integration/RFPSP/Adapt RFPSP Scripts", false, 8112 )]
+		[MenuItem ( "ICE/ICE Integration/Damage/RFPSP/Adapt RFPSP Scripts", false, 8033 )]
 		static void AdaptRFPSPScripts() 
 		{
 			{
@@ -246,7 +247,7 @@ namespace ICE.Integration.Menus
 
 		[MenuItem ( "ICE/ICE Integration/RFPSP/Adapt RFPSP Scripts", true)]
 		static bool ValidateAdaptRFPSPScripts() {
-		#if ICE_RFPSP
+			#if ICE_RFPSP
 			string _text = File.ReadAllText("Assets/RFPSP/Scripts/Weapons/WeaponBehavior.cs");
 			if( ! _text.Contains( "BEGIN ICE DAMAGE - MODIFIED BY ICE" ) )
 				return true;
