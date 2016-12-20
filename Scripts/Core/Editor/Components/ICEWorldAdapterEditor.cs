@@ -1,6 +1,6 @@
 ﻿// ##############################################################################
 //
-// ICEWorldTPCAdapterEditor.cs
+// ICEWorldDamageAdapterEditor.cs
 // Version 1.3.5
 //
 // © Pit Vetterick, ICE Technologies Consulting LTD. All Rights Reserved.
@@ -26,17 +26,17 @@ using ICE.World.EditorUtilities;
 
 namespace ICE.Integration.Adapter
 {
-	[CustomEditor(typeof(ICEWorldAdapter))]
-	public class ICEWorldTPCAdapterEditor : ICEWorldBehaviourEditor
+	[CustomEditor(typeof(ICEWorldDamageAdapter))]
+	public class ICEWorldDamageAdapterEditor : ICEWorldBehaviourEditor
 	{
 		public override void OnInspectorGUI()
 		{
-			ICEWorldAdapter _target = DrawMonoHeader<ICEWorldAdapter>();
-			DrawWorldTPCAdapter( _target );
+			ICEWorldDamageAdapter _target = DrawMonoHeader<ICEWorldDamageAdapter>();
+			DrawAdapterContent( _target );
 			DrawMonoFooter( _target );
 		}
 
-		public void DrawWorldTPCAdapter( ICEWorldAdapter _adapter )
+		public void DrawAdapterContent( ICEWorldDamageAdapter _adapter )
 		{
 			#if ICE_OPSIVE_TPC
 			#elif ICE_UFPS
