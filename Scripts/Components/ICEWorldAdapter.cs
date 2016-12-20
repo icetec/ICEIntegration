@@ -23,7 +23,7 @@ using ICE.World.EnumTypes;
 
 namespace ICE.Integration.Adapter
 {
-#if TPC
+#if ICE_OPSIVE_TPC 
 	using Opsive.ThirdPersonController;
 
 	public class ICEWorldAdapter : Health 
@@ -64,7 +64,7 @@ namespace ICE.Integration.Adapter
 				base.Die( _position, _force, _attacker );
 		}
 	}
-#elif UFPS
+#elif ICE_UFPS
 	public class ICEWorldAdapter : vp_DamageHandler {
 
 		protected ICEWorldEntity m_Entity = null;
@@ -136,7 +136,7 @@ namespace ICE.Integration.Adapter
 		}
 	}
 #elif RFPS
-#elif UNITZ
+#elif ICE_UNITZ
 	[RequireComponent(typeof(ICEWorldEntity))]
 	public class ICEWorldAdapter : DamageManager {
 

@@ -38,10 +38,10 @@ namespace ICE.Integration.Adapter
 
 		public void DrawWorldTPCAdapter( ICEWorldAdapter _adapter )
 		{
-			#if TPC
-			#elif UFPS
+			#if ICE_OPSIVE_TPC
+			#elif ICE_UFPS
 			#elif RFPS
-			#elif UNITZ
+			#elif ICE_UNITZ
 			#else
 			#endif
 		}

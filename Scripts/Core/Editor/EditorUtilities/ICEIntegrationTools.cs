@@ -44,17 +44,19 @@ namespace ICE.Integration.Menus
 	public class ICEIntegrationTools : AssetPostprocessor
 	{
 		/// <summary>
-		/// Custom defines to add based on the file to detect the asset by, and the desired platforms
+		/// Custom ICE asset defines to add based on the file and keyword to detect the asset and the desired platforms
 		/// </summary>
 		private static List<AssetDefine> m_CustomDefines = new List<AssetDefine>
 		{
 			/*new AssetDefine("ICEWorldBehaviour.cs", "", true, null, "ICE" ),*/
-			new AssetDefine("ICECreatureControl.cs", "", true, null, "ICECC" ),
-			new AssetDefine("PlayMakerEditor.dll", "", true, null, "PLAYMAKER" ),
-			new AssetDefine("Health.cs", "namespace Opsive.ThirdPersonController", true, null, "TPC" ),
-			new AssetDefine("vp_DamageHandler.cs", "", true, null, "UFPS" ),
-			new AssetDefine("CharacterDamage.cs", "", true, null, "RFPSP" ),
-			new AssetDefine("DamageManager.cs", "UnitZ", ICE.World.Objects.CodeAdapter.TryPreparingUnitZ(), null, "UNITZ" ),
+			new AssetDefine("ICECreatureControl.cs", "", true, null, "ICE_CC" ),
+			new AssetDefine("ICEEnvironment.cs", "", true, null, "ICE_ENV" ),
+			new AssetDefine("AstarPath.cs", "", true, null, "ICE_ASTAR" ),
+			new AssetDefine("PlayMakerEditor.dll", "", true, null, "ICE_PLAYMAKER" ),
+			new AssetDefine("Health.cs", "namespace Opsive.ThirdPersonController", true, null, "ICE_OPSIVE_TPC" ),
+			new AssetDefine("vp_DamageHandler.cs", "", true, null, "ICE_UFPS" ),
+			new AssetDefine("CharacterDamage.cs", "", true, null, "ICE_RFPSP" ),
+			new AssetDefine("DamageManager.cs", "UnitZ", true, null, "ICE_UNITZ" ),
 		};
 
 		private struct AssetDefine

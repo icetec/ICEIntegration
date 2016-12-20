@@ -1,6 +1,6 @@
 ﻿// ##############################################################################
 //
-// ICE.World.Objects.ice_objects_integration.cs
+// ICE.World.Objects.ice_objects_integration.cs | DamageConverter : EntityDamageConverter
 // Version 1.3.5
 //
 // Copyrights © Pit Vetterick, ICE Technologies Consulting LTD. All Rights Reserved.
@@ -37,55 +37,28 @@ using ICE.World.Objects;
 using ICE.World.Utilities;
 using ICE.World.EnumTypes;
 
-namespace ICE.World.Objects
+namespace ICE.Integration.Objects
 {
-	public class CodeAdapter
-	{
-		public static bool TryPreparingUnitZ(){
+	public class DamageConverter : EntityDamageConverter{
 
-			#if UNITY_EDITOR
-				string _file = "Assets/UnitZ/Scripts/Damage/DamageManager.cs";
-				if( File.Exists( _file ) )
-				{
-				string _text = "";//File.ReadAllText( _file );
-					if( ! _text.Contains( "MODIFIED BY ICE" ) )
-					{
-						string _search_str = "public void ApplyDamage";
-						string _replace_str = "// MODIFIED BY ICE - virtual modifier was added\n" +
-							"\tpublic virtual void ApplyDamage";
-
-						_text = _text.Replace( _search_str, _replace_str );
-
-						Debug.Log( "Insert virtual modifier for ApplyDamage in '" + _file + "'" ); 
-						//File.WriteAllText( _file, _text );
-					}
-
-					return true;
-				}
-
-				return false;
-			#else
-				return true;
-			#endif
+		public DamageConverter(){
+			HandleDamage = DoHandleDamage;
 		}
-	}
 
-	public class DamageConverter{
-
-		public static bool HandleDamage( GameObject _sender, GameObject _target, DamageTransferType _impact_type, float _damage, string _damage_method, Vector3 _damage_point, DamageForceType _force_type, float _force )
+		public new static bool DoHandleDamage( GameObject _sender, GameObject _target, DamageTransferType _impact_type, float _damage, string _damage_method, Vector3 _damage_point, DamageForceType _force_type, float _force )
 		{
 			if( _target == null || _sender == null || _target == _sender )
 				return false;
 
 			bool _handled = false;
 
-			#if UFPS
+			#if ICE_UFPS
 			_handled = TryUFPSDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
-			#elif RFPSP
+			#elif ICE_RFPSP
 			_handled = TryRFPSPDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
-			#elif TPC
+			#elif ICE_OPSIVE_TPC
 			_handled = TryTPCDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
-			#elif UNITZ
+			#elif ICE_UNITZ
 			_handled = TryUnitZDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#endif
 		
@@ -112,7 +85,7 @@ namespace ICE.World.Objects
 
 			bool _handled = false;
 
-			#if RFPSP
+			#if ICE_RFPSP
 
 			switch( _target.gameObject.layer )
 			{
@@ -197,7 +170,7 @@ namespace ICE.World.Objects
 
 			bool _handled = false;
 
-			#if UFPS
+			#if ICE_UFPS
 
 			vp_DamageTransfer _damage_transfer = _target.GetComponent<vp_DamageTransfer>();				
 			if( _damage_transfer != null )
@@ -239,7 +212,7 @@ namespace ICE.World.Objects
 
 			bool _handled = false;
 
-			#if TPC
+			#if ICE_OPSIVE_TPC
 
 			Vector3 _position = ( _damage_point == Vector3.zero ? _target.transform.position : _damage_point ); 
 			Vector3 _direction = _sender.transform.position - _position;
@@ -276,7 +249,7 @@ namespace ICE.World.Objects
 
 			bool _handled = false;
 
-			#if UNITZ
+			#if ICE_UNITZ
 
 			DamageManager _damage_manager = _target.GetComponent<DamageManager>(); 
 			if( _damage_manager != null )
