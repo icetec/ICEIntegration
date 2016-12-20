@@ -26,7 +26,7 @@ using ICE.World.EditorUtilities;
 using ICE.World.Windows;
 
 using ICE.Integration.Adapter;
-
+using ICE.Integration.Windows;
 
 namespace ICE.Integration.Menus
 {
@@ -38,6 +38,21 @@ namespace ICE.Integration.Menus
 			ICEIntegrationTools.ValidateDefines();
 		}
 
+		// INFOS
+		[MenuItem ("ICE/ICE Integration/Repository", false, 9000 )]
+		static void Repository (){
+			Application.OpenURL("https://github.com/icetec/ICEIntegration");
+		}
+
+		[MenuItem ("ICE/ICE Integration/Wiki", false, 9000 )]
+		static void Wiki (){
+			Application.OpenURL("https://github.com/icetec/ICEIntegration/wiki");
+		}
+
+		[MenuItem ("ICE/ICE Integration/About", false, 9000 )]
+		static void ShowAbout(){
+			ICEIntegrationAbout.Create();
+		} 
 	
 	}
 }
