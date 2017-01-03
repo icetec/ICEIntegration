@@ -51,6 +51,7 @@ namespace ICE.Integration.Menus
 			/*new AssetDefine("ICEWorldBehaviour.cs", "", true, null, "ICE" ),*/
 			new AssetDefine("ICECreatureControl.cs", "", true, null, "ICE_CC" ),
 			new AssetDefine("ICEEnvironment.cs", "", true, null, "ICE_ENV" ),
+			new AssetDefine("PhotonNetwork.cs", "", true, null, "ICE_PUN" ),
 			new AssetDefine("AstarPath.cs", "", true, null, "ICE_ASTAR" ),
 			new AssetDefine("PlayMakerEditor.dll", "", true, null, "ICE_PLAYMAKER" ),
 			new AssetDefine("UniStormWeatherSystem_C.cs", "", true, null, "ICE_UNISTORM" ),

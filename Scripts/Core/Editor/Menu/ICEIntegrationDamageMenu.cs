@@ -42,7 +42,7 @@ namespace ICE.Integration.Menus
 			{
 				foreach( ICEWorldEntity _entity in _entities )
 				{
-					if( _entity.EntityType != ICE.World.EnumTypes.EntityClassType.Player && _entity.GetComponent<ICEWorldDamageAdapter>() == null )
+					if( _entity.GetComponent<ICEWorldDamageAdapter>() == null ) //_entity.EntityType != ICE.World.EnumTypes.EntityClassType.Player && 
 						_entity.gameObject.AddComponent<ICEWorldDamageAdapter>();						
 				}
 			}

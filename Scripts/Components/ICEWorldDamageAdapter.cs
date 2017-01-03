@@ -21,6 +21,9 @@ using ICE.World.Objects;
 using ICE.World.Utilities;
 using ICE.World.EnumTypes;
 
+using ICE.Integration;
+using ICE.Integration.Objects;
+
 #if ICE_OPSIVE_TPC 
 using Opsive.ThirdPersonController;
 #endif
@@ -34,6 +37,11 @@ namespace ICE.Integration.Adapter
 		public ICEWorldEntity Entity{
 			get{ return m_Entity = ( m_Entity == null ? ICEWorldEntity.GetWorldEntity( this.gameObject ) : m_Entity ); }
 		}
+
+		// IMPORTANT: this overrides the EntityDamageConverter.DoHandleDamage method with the 
+		// customized damage method and allows to use the original damage handler of the asset.
+		private DamageConverter _dc = new DamageConverter();
+
 		/**/
 		protected override void Awake()
 		{
@@ -73,6 +81,10 @@ namespace ICE.Integration.Adapter
 		public ICEWorldEntity Entity{
 			get{ return m_Entity = ( m_Entity == null ? ICEWorldEntity.GetWorldEntity( this.gameObject ) : m_Entity ); }
 		}
+
+		// IMPORTANT: this overrides the EntityDamageConverter.DoHandleDamage method with the 
+		// customized damage method and allows to use the original damage handler of the asset.
+		private DamageConverter _dc = new DamageConverter();
 
 		protected override void Awake()
 		{
@@ -148,6 +160,10 @@ namespace ICE.Integration.Adapter
 			get{ return m_Entity = ( m_Entity == null ? ICEWorldEntity.GetWorldEntity( this.gameObject ) : m_Entity ); }
 		}
 
+		// IMPORTANT: this overrides the EntityDamageConverter.DoHandleDamage method with the 
+		// customized damage method and allows to use the original damage handler of the asset.
+		private DamageConverter _dc = new DamageConverter();
+
 		public override void ApplyDamage( int _damage, Vector3 _direction, string _attacker_id, string _team )
 		{
 			if( Entity == null )
@@ -168,8 +184,12 @@ namespace ICE.Integration.Adapter
 
 		protected ICEWorldEntity m_Entity = null;
 		public ICEWorldEntity Entity{
-		get{ return m_Entity = ( m_Entity == null ? ICEWorldEntity.GetWorldEntity( this.gameObject ) : m_Entity ); }
+			get{ return m_Entity = ( m_Entity == null ? ICEWorldEntity.GetWorldEntity( this.gameObject ) : m_Entity ); }
 		}
+
+		// IMPORTANT: this overrides the EntityDamageConverter.DoHandleDamage method with the 
+		// customized damage method and allows to use the original damage handler of the asset.
+		private DamageConverter _dc = new DamageConverter();
 
 		public void ChangeHealth( float _damage )
 		{
