@@ -39,6 +39,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
+using ICE;
+using ICE.World;
+
 namespace ICE.Integration.Menus
 {
 	public class ICEIntegrationTools : AssetPostprocessor
@@ -57,6 +60,7 @@ namespace ICE.Integration.Menus
 			new AssetDefine("UniStormWeatherSystem_C.cs", "", true, null, "ICE_UNISTORM" ),
 			new AssetDefine("Health.cs", "namespace Opsive.ThirdPersonController", true, null, "ICE_OPSIVE_TPC" ),
 			new AssetDefine("vp_DamageHandler.cs", "", true, null, "ICE_UFPS" ),
+			new AssetDefine("vp_MPMaster.cs", "", true, null, "ICE_UFPS_MP" ),
 			new AssetDefine("CharacterDamage.cs", "", true, null, "ICE_RFPSP" ),
 			new AssetDefine("DamageManager.cs", "UnitZ", true, null, "ICE_UNITZ" ),
 			new AssetDefine("Health.cs", "Author: MutantGopher", true, null, "ICE_EASY_WEAPONS" ),
@@ -156,7 +160,7 @@ namespace ICE.Integration.Menus
 		/// <param name="targetGroups">platforms to add this for (null will add to all platforms)</param>
 		public static void AddCompileDefine( string _new_define_compile_constant, BuildTargetGroup[] _target_groups = null )
 		{
-			Debug.Log( "Found '" + _new_define_compile_constant + "'" );
+			ICEDebug.LogInfo( "Found '" + _new_define_compile_constant + "'" );
 
 			if( _target_groups == null )
 				_target_groups = (BuildTargetGroup[])Enum.GetValues(typeof(BuildTargetGroup));
@@ -171,7 +175,7 @@ namespace ICE.Integration.Menus
 
 				if( ! _defines.Contains( _new_define_compile_constant ) )
 				{
-					Debug.Log( "Add new define '" + _new_define_compile_constant + "' for BuildTargetGroup '" + _group.ToString() + "'" );
+					ICEDebug.LogInfo( "Add new define '" + _new_define_compile_constant + "' for BuildTargetGroup '" + _group.ToString() + "'" );
 
 					//if the list is empty, we don't need to append a semicolon first
 					if( _defines.Length > 0 )         
@@ -183,7 +187,7 @@ namespace ICE.Integration.Menus
 					try {
 						PlayerSettings.SetScriptingDefineSymbolsForGroup( _group, _defines );
 					} catch {
-						Debug.Log( "Can't add define '" + _new_define_compile_constant + "' for BuildTargetGroup '" + _group.ToString() + "'" );
+						ICEDebug.LogError( "Can't add define '" + _new_define_compile_constant + "' for BuildTargetGroup '" + _group.ToString() + "'" );
 					}
 
 				}
@@ -204,7 +208,7 @@ namespace ICE.Integration.Menus
 			{
 				string _defines = PlayerSettings.GetScriptingDefineSymbolsForGroup( _group );
 
-				Debug.Log( "Remove custom define '" + _define_compile_constant + "' define for BuildTargetGroup '" + _group.ToString() + "'" );
+				ICEDebug.LogInfo( "Remove custom define '" + _define_compile_constant + "' define for BuildTargetGroup '" + _group.ToString() + "'" );
 
 				int _index = _defines.IndexOf( _define_compile_constant );
 				if( _index < 0 )
@@ -222,7 +226,7 @@ namespace ICE.Integration.Menus
 				try {
 					PlayerSettings.SetScriptingDefineSymbolsForGroup( _group, _defines );
 				} catch {
-					Debug.Log( "Can't remove define '" + _define_compile_constant + "' for BuildTargetGroup '" + _group.ToString() + "'" );
+					ICEDebug.LogError( "Can't remove define '" + _define_compile_constant + "' for BuildTargetGroup '" + _group.ToString() + "'" );
 				}
 
 			}

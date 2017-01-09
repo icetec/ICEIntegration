@@ -32,15 +32,35 @@ namespace ICE.Integration.Menus
 {
 	public class ICEIntegrationNetworkingMenu : MonoBehaviour {
 
+		[MenuItem ( "ICE/ICE Integration/Networking/Create Network Manager", false, 8022 )]
+		static void AddNetworkManager() 
+		{
+			ICEWorldNetworkManager _manager = ICEWorldNetworkManager.Instance as ICEWorldNetworkManager;
+
+			if( _manager == null )
+			{
+				GameObject _object = new GameObject();
+				_manager = _object.AddComponent<ICEWorldNetworkManager>();
+				_object.name = "NetworkManager";
+			}
+		}
+			
+		[MenuItem ( "ICE/ICE Integration/Networking/Create Network Manager", true)]
+		static bool ValidateAddNetworkManager() {
+			if( ICEWorldNetworkManager.Instance == null )
+				return true;
+			else
+				return false;
+		}
 
 		// ADD NETWORKING ADAPTER
-		[MenuItem ("ICE/ICE Integration/Networking/Add Networking Adapters", false, 8022 )]
+		[MenuItem ("ICE/ICE Integration/Networking/Add Networking Adapters", false, 8033 )]
 		static void AddNetworkingAdapter(){
 
 			// add the ICEWorldNetworkManager to an existing register object
 			ICEWorldRegister _register = GameObject.FindObjectOfType<ICEWorldRegister>();
-			if( _register != null && _register.GetComponent<ICEWorldNetworkManager>() == null )
-				_register.gameObject.AddComponent<ICEWorldNetworkManager>();
+			if( _register != null && _register.GetComponent<ICEWorldNetworkSpawner>() == null )
+				_register.gameObject.AddComponent<ICEWorldNetworkSpawner>();
 			
 			// add the ICEWorldNetworkingAdapter to all entities
 			ICEWorldEntity[] _entities = GameObject.FindObjectsOfType<ICEWorldEntity>();
@@ -48,8 +68,13 @@ namespace ICE.Integration.Menus
 			{
 				foreach( ICEWorldEntity _entity in _entities )
 				{
-					if( _entity.GetComponent<ICEWorldNetworkingAdapter>() == null )
-						_entity.gameObject.AddComponent<ICEWorldNetworkingAdapter>();
+					if( ( _entity.GetComponent<ICEWorldNetworkView>() == null ) &&
+						( _entity.EntityType != ICE.World.EnumTypes.EntityClassType.BodyPart ) &&
+						( _entity.EntityType != ICE.World.EnumTypes.EntityClassType.Location ) &&
+						( _entity.EntityType != ICE.World.EnumTypes.EntityClassType.Object ) )
+					{
+						_entity.gameObject.AddComponent<ICEWorldNetworkView>();
+					}
 				}
 			}
 		}
@@ -64,13 +89,13 @@ namespace ICE.Integration.Menus
 		}
 
 		// REMOVE NETWORKING ADAPTER
-		[MenuItem ("ICE/ICE Integration/Networking/Remove Networking Adapters", false, 8022 )]
+		[MenuItem ("ICE/ICE Integration/Networking/Remove Networking Adapters", false, 8033 )]
 		static void RemoveNetworkingAdapter(){
 
 			// remove the ICEWorldNetworkManager from an existing register object
 			ICEWorldRegister _register = GameObject.FindObjectOfType<ICEWorldRegister>();
-			if( _register != null && _register.GetComponent<ICEWorldNetworkManager>() != null )
-				GameObject.DestroyImmediate( _register.GetComponent<ICEWorldNetworkManager>() );
+			if( _register != null && _register.GetComponent<ICEWorldNetworkSpawner>() != null )
+				GameObject.DestroyImmediate( _register.GetComponent<ICEWorldNetworkSpawner>() );
 
 			// remove the ICEWorldNetworkingAdapter from all entities
 			ICEWorldEntity[] _entities = GameObject.FindObjectsOfType<ICEWorldEntity>();
@@ -78,8 +103,8 @@ namespace ICE.Integration.Menus
 			{
 				foreach( ICEWorldEntity _entity in _entities )
 				{
-					if( _entity.GetComponent<ICEWorldNetworkingAdapter>() != null )
-						GameObject.DestroyImmediate( _entity.GetComponent<ICEWorldNetworkingAdapter>() );
+					if( _entity.GetComponent<ICEWorldNetworkView>() != null )
+						GameObject.DestroyImmediate( _entity.GetComponent<ICEWorldNetworkView>() );
 				}
 			}
 		}

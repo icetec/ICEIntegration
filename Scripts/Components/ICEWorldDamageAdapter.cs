@@ -82,6 +82,8 @@ namespace ICE.Integration.Adapter
 			get{ return m_Entity = ( m_Entity == null ? ICEWorldEntity.GetWorldEntity( this.gameObject ) : m_Entity ); }
 		}
 
+		public bool UseUFPSDamageHandling = false;
+
 		// IMPORTANT: this overrides the EntityDamageConverter.DoHandleDamage method with the 
 		// customized damage method and allows to use the original damage handler of the asset.
 		private DamageConverter _dc = new DamageConverter();
@@ -102,7 +104,8 @@ namespace ICE.Integration.Adapter
 			if( Entity == null )
 				return;
 
-			CurrentHealth = Entity.Status.Durability;
+			if( UseUFPSDamageHandling )
+				CurrentHealth = Entity.Status.Durability;
 
 			if( Entity.Status.IsDestroyed )
 				Die();
@@ -125,7 +128,7 @@ namespace ICE.Integration.Adapter
 
 			Entity.AddDamage( damageInfo.Damage, _direction, _position, _original_source , 0 );
 
-			if( ! Entity.Status.IsDestroyed )
+			if( UseUFPSDamageHandling && ! Entity.Status.IsDestroyed )
 				base.Damage( damageInfo );
 		}
 
@@ -142,11 +145,39 @@ namespace ICE.Integration.Adapter
 
 		public override void Die()
 		{
-			if( Entity != null )
+			if( Entity == null )
+				return;
+
+			if( UseUFPSDamageHandling && Entity.Status.IsDestroyed )
+				base.Die();	
+		}
+
+		public override void DieBySources( Transform[] sourceAndOriginalSource )
+		{
+			if( Entity == null )
+				return;
+			
+			if( sourceAndOriginalSource.Length != 2 )
 			{
-				if( Entity.Status.IsDestroyed )
-					base.Die();				
+				ICEDebug.LogWarning( "Warning (" + this + ") 'DieBySources' argument must contain 2 transforms." );
+				return;
 			}
+
+			Transform _source = sourceAndOriginalSource[0];
+			Transform _original_source = ( sourceAndOriginalSource[1] != null ? sourceAndOriginalSource[1] : _source );
+
+			Vector3 _position = ( _source != null ? _source.position : transform.position ); 
+			Vector3 _direction = ( _original_source != null ? _original_source.position - transform.position : ( _source != null ? _source.forward : Vector3.zero ) );
+
+			Entity.AddDamage( 100, _direction, _position, _original_source , 0 );
+			/*
+			 // ToDo: could check for an entity to get the damage value ...
+			Source = sourceAndOriginalSource[0];
+			OriginalSource = sourceAndOriginalSource[1];
+			*/
+
+			if( UseUFPSDamageHandling )
+				base.DieBySources( sourceAndOriginalSource );	
 		}
 	}
 #elif ICE_RFPSP

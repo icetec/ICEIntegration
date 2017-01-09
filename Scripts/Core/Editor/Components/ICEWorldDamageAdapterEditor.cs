@@ -40,6 +40,7 @@ namespace ICE.Integration.Adapter
 		{
 			#if ICE_OPSIVE_TPC
 			#elif ICE_UFPS
+			_adapter.UseUFPSDamageHandling = ICEEditorLayout.Toggle( "Use UFPS Damage Handling", "", _adapter.UseUFPSDamageHandling );
 			#elif RFPS
 			#elif ICE_UNITZ
 			#else

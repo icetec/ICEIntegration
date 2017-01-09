@@ -53,15 +53,15 @@ namespace ICE.Integration.Objects
 			bool _handled = false;
 
 			#if ICE_UFPS
-			_handled = TryUFPSDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
+				_handled = TryUFPSDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#elif ICE_RFPSP
-			_handled = TryRFPSPDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
+				_handled = TryRFPSPDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#elif ICE_OPSIVE_TPC
-			_handled = TryTPCDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
+				_handled = TryTPCDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#elif ICE_UNITZ
-			_handled = TryUnitZDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
+				_handled = TryUnitZDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#elif ICE_EASY_WEAPONS
-			_handled = TryEasyWeaponsDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
+				_handled = TryEasyWeaponsDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#endif
 		
 			return _handled;
@@ -91,62 +91,62 @@ namespace ICE.Integration.Objects
 
 			switch( _target.gameObject.layer )
 			{
-			case 0://hit object
-			if(_target.GetComponent<AppleFall>()){
-			_target.GetComponent<AppleFall>().ApplyDamage( _damage );
-			_handled = true;
-			}else if(_target.GetComponent<BreakableObject>()){
-			_target.GetComponent<BreakableObject>().ApplyDamage( _damage );
-			_handled = true;
-			}/*else if(_target.GetComponent<ExplosiveObject>()){
-			_target.GetComponent<ExplosiveObject>().ApplyDamage( _damage );
-			_handled = true;
-			}*/else if(_target.GetComponent<MineExplosion>()){
-			_target.GetComponent<MineExplosion>().ApplyDamage( _damage );
-			_handled = true;
+				case 0://hit object
+					if(_target.GetComponent<AppleFall>()){
+						_target.GetComponent<AppleFall>().ApplyDamage( _damage );
+						_handled = true;
+					}else if(_target.GetComponent<BreakableObject>()){
+						_target.GetComponent<BreakableObject>().ApplyDamage( _damage );
+						_handled = true;
+					}/*else if(_target.GetComponent<ExplosiveObject>()){
+					_target.GetComponent<ExplosiveObject>().ApplyDamage( _damage );
+					_handled = true;
+					}*/else if(_target.GetComponent<MineExplosion>()){
+						_target.GetComponent<MineExplosion>().ApplyDamage( _damage );
+						_handled = true;
+					}
+					break;
+				case 1://hit object is an object with transparent effects like a window
+					if(_target.GetComponent<BreakableObject>()){
+						_target.GetComponent<BreakableObject>().ApplyDamage( _damage );
+						_handled = true;
+					}	
+					break;
+				case 13://hit object is an NPC
+
+					Vector3 _position = ( _damage_point == Vector3.zero ? _target.transform.position : _damage_point ); 
+					Vector3 _direction = _sender.transform.position - _target.transform.position;
+
+					if(_target.GetComponent<CharacterDamage>() && _target.GetComponent<AI>().enabled)
+					{
+						_target.gameObject.GetComponent<CharacterDamage>().ApplyDamage( _damage, _direction, _position, _target.transform, true, false);
+						_handled = true;
+					}
+
+					if(_target.GetComponent<LocationDamage>() && _target.GetComponent<LocationDamage>().AIComponent.enabled)
+					{
+						_target.gameObject.GetComponent<LocationDamage>().ApplyDamage( _damage, _direction, _position, _target.transform, true, false);
+						_handled = true;
+					}
+
+					break;
+				case 11://hit object is player or ...
+				case 20://hit object is player lean collider
+					if(_target.GetComponent<FPSPlayer>()){
+						_target.GetComponent<FPSPlayer>().ApplyDamage( _damage, _target.transform, false );
+						_handled = true;
+					}	
+					if(_target.GetComponent<LeanColliderDamage>()){
+						_target.GetComponent<LeanColliderDamage>().ApplyDamage( _damage );
+						_handled = true;
+					}	
+					break;
+				default:
+					break;	
 			}
-			break;
-			case 1://hit object is an object with transparent effects like a window
-			if(_target.GetComponent<BreakableObject>()){
-			_target.GetComponent<BreakableObject>().ApplyDamage( _damage );
-			_handled = true;
-			}	
-			break;
-			case 13://hit object is an NPC
 
-			Vector3 _position = ( _damage_point == Vector3.zero ? _target.transform.position : _damage_point ); 
-			Vector3 _direction = _sender.transform.position - _target.transform.position;
-
-			if(_target.GetComponent<CharacterDamage>() && _target.GetComponent<AI>().enabled)
-			{
-			_target.gameObject.GetComponent<CharacterDamage>().ApplyDamage( _damage, _direction, _position, _target.transform, true, false);
-			_handled = true;
-			}
-
-			if(_target.GetComponent<LocationDamage>() && _target.GetComponent<LocationDamage>().AIComponent.enabled)
-			{
-			_target.gameObject.GetComponent<LocationDamage>().ApplyDamage( _damage, _direction, _position, _target.transform, true, false);
-			_handled = true;
-			}
-
-			break;
-			case 11://hit object is player or ...
-			case 20://hit object is player lean collider
-			if(_target.GetComponent<FPSPlayer>()){
-			_target.GetComponent<FPSPlayer>().ApplyDamage( _damage, _target.transform, false );
-			_handled = true;
-			}	
-			if(_target.GetComponent<LeanColliderDamage>()){
-			_target.GetComponent<LeanColliderDamage>().ApplyDamage( _damage );
-			_handled = true;
-			}	
-			break;
-			default:
-			break;	
-			}
-
-			//if( _handled == true )
-			//FPSPlayerComponent.UpdateHitTime();//used for hitmarker
+				//if( _handled == true )
+				//FPSPlayerComponent.UpdateHitTime();//used for hitmarker
 
 			#endif
 
@@ -177,17 +177,17 @@ namespace ICE.Integration.Objects
 			vp_DamageTransfer _damage_transfer = _target.GetComponent<vp_DamageTransfer>();				
 			if( _damage_transfer != null )
 			{
-			_damage_transfer.Damage( new vp_DamageInfo( _damage, _sender.transform, ( _force_type == DamageForceType.Explosion ? vp_DamageInfo.DamageType.Explosion : vp_DamageInfo.DamageType.Impact ) ) );
-			_handled = true;
+				_damage_transfer.Damage( new vp_DamageInfo( _damage, _sender.transform, ( _force_type == DamageForceType.Explosion ? vp_DamageInfo.DamageType.Explosion : vp_DamageInfo.DamageType.Impact ) ) );
+				_handled = true;
 			}
 			else
 			{
-			vp_DamageHandler _damage_handler = _target.GetComponent<vp_DamageHandler>();				
-			if( _damage_handler != null )
-			{
-			_damage_handler.Damage( new vp_DamageInfo( _damage, _sender.transform, ( _force_type == DamageForceType.Explosion ? vp_DamageInfo.DamageType.Explosion : vp_DamageInfo.DamageType.Impact ) ) );
-			_handled = true;
-			}
+				vp_DamageHandler _damage_handler = _target.GetComponent<vp_DamageHandler>();				
+				if( _damage_handler != null )
+				{
+					_damage_handler.Damage( new vp_DamageInfo( _damage, _sender.transform, ( _force_type == DamageForceType.Explosion ? vp_DamageInfo.DamageType.Explosion : vp_DamageInfo.DamageType.Impact ) ) );
+					_handled = true;
+				}
 			}
 
 			#endif
