@@ -45,10 +45,19 @@ namespace ICE.Integration.Adapter
 		}
 
 		public bool UseDeactivateSceneCreatures = true;
+		public bool WaitForUFPSMP = true;
+
+		public bool WaitForExternalSpawnEvent{
+			get{
+				return WaitForUFPSMP;
+			}
+		}
 
 		protected virtual void Awake()
 		{
 			DeactivateSceneCreatures();
+
+			ICEWorldInfo.IsMultiplayer = true;
 		}
 
 		/// <summary>
@@ -73,60 +82,44 @@ namespace ICE.Integration.Adapter
 
 		protected virtual void Update()
 		{
+			ICEWorldInfo.IsMultiplayer = true;
+
 			if( ! ICEWorldInfo.IsMultiplayer || ! PhotonNetwork.inRoom )
 				return;
 			
-			if( PhotonNetwork.inRoom )
-			{
-				ICEWorldInfo.NetworkConnectedAndReady = true;
-			}
-			/*
-			if( m_ClientState == ClientState.Joined )
-				ICEWorldInfo.NetworkConnectedAndReady = true;
-			else
-				ICEWorldInfo.NetworkConnectedAndReady = false;*/
+			if( ! WaitForExternalSpawnEvent && ! ICEWorldInfo.NetworkSpawnerReady && PhotonNetwork.inRoom )
+				ICEWorldInfo.NetworkSpawnerReady = true;
+			else if( vp_MPMaster.Phase == vp_MPMaster.GamePhase.Playing )
+				ICEWorldInfo.NetworkSpawnerReady = true;
 		}
-		/*
-		public virtual void OnConnectedToMaster()
-		{
-			if( ! m_IsConnecting )
-				return;
-			
-			PhotonNetwork.JoinRandomRoom();
-		}
-
-		public virtual void OnJoinedLobby()
-		{
-			if( ! m_IsConnecting )
-				return;
-			
-			PhotonNetwork.JoinRandomRoom();
-		}
-
-		public virtual void OnPhotonRandomJoinFailed()
-		{
-			if( ! m_IsConnecting )
-				return;
-			
-			PhotonNetwork.CreateRoom( null, new RoomOptions() { MaxPlayers = 4 }, null );
-		}
-
-		public virtual void OnFailedToConnectToPhoton( DisconnectCause _cause )
-		{
-			Debug.LogError( "Cause: " + _cause );
-		}*/
 
 		public override void OnJoinedRoom()
 		{
-			ICEWorldInfo.NetworkConnectedAndReady = true;
+			if( ! WaitForExternalSpawnEvent )
+				ICEWorldInfo.NetworkSpawnerReady = true;
+		}
+
+		/// <summary>
+		/// Receives the respawn - TransmitRespawnAll()
+		/// </summary>
+		/// <param name="position">Position.</param>
+		/// <param name="rotation">Rotation.</param>
+		/// <param name="info">Info.</param>
+		[PunRPC]
+		public virtual void ReceivePlayerRespawn( Vector3 position, Quaternion rotation, PhotonMessageInfo info )
+		{
+			ICEDebug.LogInfo( "Receive RPC PlayerRespawn from vp_MPMaster and set NetworkSpawnerReady to TRUE. Spawning will be available now." );
+			ICEWorldInfo.NetworkSpawnerReady = true;
+		}
+
+		[PunRPC]
+		public void ReceiveLoadLevel(string levelName, PhotonMessageInfo info)
+		{
+			ICEDebug.LogInfo( "Receive RPC LoadLevel from vp_MPMaster" );
 		}
 
 		public void OnInstantiateObject( out GameObject _object, GameObject _reference, Vector3 _position, Quaternion _rotation )
 		{
-	#if ICE_UFPS
-			if( vp_MPMaster.Phase != vp_MPMaster.GamePhase.Playing )
-				ICEDebug.LogError( " Invalid Phase : " + vp_MPMaster.Phase.ToString() );
-	#endif
 
 			_object = null;
 
@@ -134,6 +127,9 @@ namespace ICE.Integration.Adapter
 
 			if( PhotonNetwork.inRoom )
 			{
+				if( ! ICEWorldInfo.NetworkSpawnerReady )
+					ICEDebug.LogWarning( "NetworkSpawner in Room but not ready!" );
+
 				// a player can spawn its own player only
 				if( _entity != null && _entity.EntityType == ICE.World.EnumTypes.EntityClassType.Player )
 				{
@@ -142,7 +138,7 @@ namespace ICE.Integration.Adapter
 				}
 
 				// only the master client can spawn scene objects
-				else if( PhotonNetwork.isMasterClient == true )
+				else if( PhotonNetwork.isMasterClient )
 				{
 					if( _entity != null )
 						ICEDebug.LogInfo( "Spawning Scene " + _entity.EntityType.ToString() + " Entity '" + _reference.name + "' via PhotonNetwork." );
@@ -189,13 +185,48 @@ namespace ICE.Integration.Adapter
 			else
 				_destroyed = false;
 		}
+		/*
+		static void AddPhotonViewToEntity( ICEWorldEntity _entity, int id)
+		{
+			PhotonView p = null;
+
+			p = (PhotonView)_entity.gameObject.AddComponent<PhotonView>();
+
+			p.viewID = (id * 1000) + 1;	// TODO: may crash with 'array index out of range' if a entity is deactivated in its prefab
+			p.onSerializeTransformOption = OnSerializeTransform.OnlyPosition;
+			p.ObservedComponents = new List<Component>();
+			p.ObservedComponents.Add(_entity);
+			p.synchronization = ViewSynchronization.UnreliableOnChange;
+
+			PhotonNetwork.networkingPeer.RegisterPhotonView(p);
+		}*/
+
+		/*
+		public void TransmitWakeUp()
+		{
+			GetComponent<PhotonView>().RPC("ReceiveWakeUp", PhotonTargets.AllBufferedViaServer );
+		}
+
+
+
+
+		[PunRPC]
+		public void ReceiveWakeUp(PhotonMessageInfo info){
+
+			//if( Application.isEditor )
+			//	Debug.Break();
+
+			Debug.Log("ReceivedWakeUp " + transform.name + " (" + transform.GetInstanceID() + " = " + photonView.viewID + " isMine:" + photonView.isMine + " MASTER :" + PhotonNetwork.isMasterClient + ")" );
+		}*/
+
+
 
 		/// <summary>
-		/// deactivates any players (local or remote) that are present
-		/// in the scene upon Awake. BACKGROUND: player objects may be
-		/// placed in the scene to facilitate updating their prefabs,
-		/// however once a multiplayer session starts only instantiated
-		/// players are allowed
+		/// deactivates any creature (local or remote) that are present
+		/// in the scene upon Awake, because Creature objects may be placed in 
+		/// the scene to facilitate updating their prefabs, however once 
+		/// a multiplayer session starts only instantiated creature 
+		/// are allowed
 		/// </summary>
 		protected virtual void DeactivateSceneCreatures()
 		{
@@ -207,7 +238,6 @@ namespace ICE.Integration.Adapter
 					_creature.gameObject.SetActive( false );
 			}
 	#endif
-
 		}
 
 		protected static Dictionary<int, ICEWorldEntity> m_EntitiesByViewID = new Dictionary<int, ICEWorldEntity>();

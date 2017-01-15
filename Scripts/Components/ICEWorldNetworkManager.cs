@@ -27,6 +27,7 @@ using ICE.World.Objects;
 using ICE.World.Utilities;
 
 using ICE.Integration;
+using ICE.Integration.Objects;
 
 
 #if ICE_PUN
@@ -35,359 +36,8 @@ using ICE.Integration;
 
 namespace ICE.Integration.Adapter
 {
-	public enum BasicNetworkStatus
-	{
-		Disconnected,
-		Connecting,
-		Connected,
-		LobbyJoined,
-		RoomJoined,
-		Warning,
-		Error
-	}
 
 #if ICE_PUN
-
-	[System.Serializable]
-	public class NetworkManagerDisplayOptionsObject : ICEDataObject{
-
-		public NetworkManagerDisplayOptionsObject(){}
-		public NetworkManagerDisplayOptionsObject( NetworkManagerDisplayOptionsObject _object ) : base( _object ) { Copy( _object ); }
-
-		public void Copy( NetworkManagerDisplayOptionsObject _object )
-		{
-			if( _object == null )
-				return;
-
-			Enabled = _object.Enabled;
-			Foldout = _object.Foldout;
-		}
-
-		public string PlayerName{
-			get{ return ( InputFieldPlayerName != null ? InputFieldPlayerName.text : "" ); } }
-		public InputField InputFieldPlayerName = null;
-
-		public int SelectedRoomIndex{
-			get{ return ( DropdownRooms != null ? DropdownRooms.value : 0 ); } }
-
-		public string SelectedRoomName{
-			get{ return ( DropdownRooms != null && DropdownRooms.captionText != null ? DropdownRooms.captionText.text : "" ); } }
-		
-		public int SelectedQualityIndex{
-			get{ return ( DropdownQuality != null ? DropdownQuality.value : 0 ); } }
-
-		public int SelectedScreenIndex{
-			get{ return ( DropdownScreen != null ? DropdownScreen.value : 0 ); } }
-		
-		[SerializeField]
-		private Dropdown m_DropdownRooms = null;
-		public Dropdown DropdownRooms{
-			get{ return ValidateRooms(); }
-			set{ m_DropdownRooms = value; ValidateRooms(); }
-		}
-
-		public List<string> Rooms{
-			get{ return ( ICEWorldNetworkManager.Instance != null ? ICEWorldNetworkManager.Instance.Connection.Rooms : new List<string>() ); }
-		}
-
-		private Dropdown ValidateRooms()
-		{
-			if( m_DropdownRooms != null && m_DropdownRooms.options.Count != Rooms.Count && ! Application.isPlaying )
-			{
-				m_DropdownRooms.ClearOptions(); 
-				m_DropdownRooms.AddOptions( Rooms );
-			}
-
-			return m_DropdownRooms;
-		}
-
-
-
-
-		[SerializeField]
-		private Dropdown m_DropdownQuality = null;
-		public Dropdown DropdownQuality{
-			get{ return ValidateQuality(); }
-			set{ m_DropdownQuality = value; ValidateQuality(); }
-		}
-
-		public string[] QualityOptions = new string[]{ "Fastest", "Fast", "Simple", "Good", "Beautiful", "Fantastic" };
-		private Dropdown ValidateQuality()
-		{
-			List<string> _options = new List<string>( QualityOptions );
-			if( m_DropdownQuality != null && m_DropdownQuality.options.Count != _options.Count )
-			{
-				m_DropdownQuality.ClearOptions(); 
-				m_DropdownQuality.AddOptions( _options );
-			}
-
-			return m_DropdownQuality;
-		}
-
-
-		
-		[SerializeField]
-		private Dropdown m_DropdownScreen = null;
-		public Dropdown DropdownScreen{
-			get{ return ValidateScreen(); }
-			set{ m_DropdownScreen = value; ValidateScreen(); }
-		}
-
-		public string[] ScreenOptions = new string[]{ "Window", "Fullscreen" };
-		private Dropdown ValidateScreen()
-		{
-			List<string> _options = new List<string>( ScreenOptions );
-			if( m_DropdownScreen != null && m_DropdownScreen.options.Count != _options.Count )
-			{
-				m_DropdownScreen.ClearOptions(); 
-				m_DropdownScreen.AddOptions( _options );
-			}
-
-			return m_DropdownScreen;
-		}
-
-		protected string m_DefaultStartButtonText = "";
-		protected string m_StartButtonText = "Log On";
-
-		protected string m_FullScreenButtonText = "Fullscreen";
-
-		public bool FoldoutLobbyPanel = true;
-		public bool FoldoutStatusPanel = true;
-		public bool FoldoutConnectPanel = true;
-
-		public RectTransform LobbyPanel = null;
-		public RectTransform StatusPanel = null;
-		public RectTransform ConnectionPanel = null;
-
-		public Toggle ToggleJoinRandomRoom = null;
-		public Toggle ToggleRandomConnect = null;
-
-		public Button ButtonConnect = null;
-		public Button ButtonDisconnect = null;
-		public Button ButtonJoin = null;
-		public Button ButtonQuit = null;
-
-		public Text TextStatus = null;
-
-		public Image ImageStatus = null;
-		public Image ImageMaster = null;
-
-		public bool UseStatusColor = true;
-
-		public Color ColorDisconnected = Color.black;
-		public Color ColorConnecting = Color.gray;
-		public Color ColorConnected = Color.white;
-		public Color ColorLobbyJoined = Color.blue;
-		public Color ColorRoomJoined = Color.green;
-		public Color ColorWarning = Color.yellow;
-		public Color ColorError = Color.red;
-
-		public bool UseStatusLog = true;
-		public int StatusLogMaxLines = 10;
-		public bool UseStatusLogTime = true;
-		public bool UseDetailedLog = false;
-
-		private List<string> m_StatusLog = new List<string>();
-
-		public void Log( string _msg )
-		{
-			if( ! Enabled || ! UseStatusLog || TextStatus == null )
-				return;
-
-			if( m_StatusLog.Count >= StatusLogMaxLines )
-				m_StatusLog.RemoveAt(0);
-			
-			m_StatusLog.Add( _msg );
-
-
-			TextStatus.text = "";
-			foreach( string _line in m_StatusLog )
-				TextStatus.text += "\n " + ( UseStatusLogTime ? System.DateTime.Now.ToShortTimeString() : "" ) + " - " + _line;
-		}
-
-		public void SetColorByNetworkStatus( BasicNetworkStatus _state = BasicNetworkStatus.Disconnected )
-		{
-			if( _state == BasicNetworkStatus.Disconnected )
-			{/*
-				switch( PhotonNetwork.connectionStateDetailed )
-				{
-				case ClientState.Queued:
-				case ClientState.QueuedComingFromGameserver:
-				case ClientState.Disconnecting:
-				case ClientState.DisconnectingFromMasterserver:
-				case ClientState.DisconnectingFromNameServer:
-				case ClientState.DisconnectingFromGameserver:
-				case ClientState.Authenticating:
-				case ClientState.ConnectingToMasterserver:
-				case ClientState.ConnectingToNameServer:
-				case ClientState.ConnectingToGameserver:		
-				case ClientState.Joining:
-				case ClientState.Leaving:
-					_state = BasicNetworkStatus.Connecting;
-					break;
-				case ClientState.Authenticated:
-				case ClientState.ConnectedToNameServer:			
-				case ClientState.ConnectedToMaster:
-				case ClientState.ConnectedToGameserver:
-					_state = BasicNetworkStatus.Connected;
-					break;
-				case ClientState.Uninitialized:
-					_state = BasicNetworkStatus.Disconnected;
-					break;
-				case ClientState.PeerCreated:
-				case ClientState.Disconnected:
-					_state = BasicNetworkStatus.Disconnected;
-					break;
-				case ClientState.JoinedLobby:
-					_state = BasicNetworkStatus.LobbyJoined;
-					break;
-				case ClientState.Joined:
-					_state = BasicNetworkStatus.RoomJoined;
-					break;
-				}*/
-			}
-
-			switch( _state )
-			{
-			case BasicNetworkStatus.Disconnected:
-				m_TargetStatusColor = ColorDisconnected;
-				break;
-			case BasicNetworkStatus.Connecting:
-				m_TargetStatusColor = ColorConnecting;
-				break;
-			case BasicNetworkStatus.Connected:
-				m_TargetStatusColor = ColorConnected;
-				break;
-			case BasicNetworkStatus.LobbyJoined:
-				m_TargetStatusColor = ColorLobbyJoined;
-				break;
-			case BasicNetworkStatus.Warning:
-				m_TargetStatusColor = ColorWarning;
-				break;
-			case BasicNetworkStatus.Error:
-				m_TargetStatusColor = ColorError;
-				break;
-			}
-		}
-
-		private Color m_TargetStatusColor;
-		public void UpdateStatusColor()
-		{
-			if( ! Enabled || ! UseStatusColor || ImageMaster == null )
-				return;
-
-			Color _color = Color.Lerp( ImageMaster.color, m_TargetStatusColor, 0.1f );
-			_color.a = ( ICEWorldInfo.IsMasterClient ? 1 : 0.25f );
-			ImageMaster.color = _color;
-		}
-	}
-
-	[System.Serializable]
-	public class NetworkManagerSceneManagementObject : ICEDataObject{
-
-		public NetworkManagerSceneManagementObject(){}
-		public NetworkManagerSceneManagementObject( NetworkManagerSceneManagementObject _object ) : base( _object ) { Copy( _object ); }
-
-		public void Copy( NetworkManagerSceneManagementObject _object )
-		{
-			if( _object == null )
-				return;
-
-			Enabled = _object.Enabled;
-			Foldout = _object.Foldout;
-		}
-
-		public bool UseSceneManagement{
-			get{ return Enabled; }			
-		}
-			
-		public string SceneNameMenu = "ICEPhotonDemoMenu";
-		public string SceneNameGame = "ICEPhotonDemoGame";
-	}
-
-	[System.Serializable]
-	public class NetworkManagerConnectionManagementObject : ICEDataObject{
-
-		public NetworkManagerConnectionManagementObject(){}
-		public NetworkManagerConnectionManagementObject( NetworkManagerConnectionManagementObject _object ) : base( _object ) { Copy( _object ); }
-
-		public void Copy( NetworkManagerConnectionManagementObject _object )
-		{
-			if( _object == null )
-				return;
-
-			Enabled = _object.Enabled;
-			Foldout = _object.Foldout;
-		}
-
-		public bool HandleConnection{
-			get{ return Enabled; }			
-		}
-
-		[SerializeField]
-		private bool m_UseMultiplayer = true;
-		public bool UseMultiplayer{
-			get{ return ( Enabled ? true : m_UseMultiplayer ); }
-			set{ m_UseMultiplayer = value; }				
-		}
-			
-		[SerializeField]
-		private bool m_AutoConnect = true;
-		public bool AutoConnect{
-			get{ return ( Enabled ? m_AutoConnect : false ); }
-			set{ m_AutoConnect = value; }				
-		}
-
-		[SerializeField]
-		private bool m_AutoJoinLobby = true;
-		public bool AutoJoinLobby{
-			get{ return ( Enabled ? m_AutoJoinLobby : false ); }
-			set{ m_AutoJoinLobby = value; }				
-		}
-
-		[SerializeField]
-		private bool m_JoinRandomRoom = true;
-		public bool JoinRandomRoom{
-			get{ return ( Enabled ? ( Rooms.Count == 0 ? true : m_JoinRandomRoom ) : false ); }
-			set{ 				
-				if( ! value && Rooms.Count == 0 )
-					Rooms.Add( m_DefaultRoomName );
-
-				m_JoinRandomRoom = value; 
-			}				
-		}
-
-		[SerializeField]
-		private List<string> m_Rooms = new List<string>();
-		public List<string> Rooms{
-			get{ return m_Rooms = ( m_Rooms == null ? new List<string>() : m_Rooms ); }
-			set{ 
-				Rooms.Clear();
-				if( value == null ) return;
-				foreach( string _room in value )
-					Rooms.Add( _room );
-			}				
-		}
-
-		[SerializeField]
-		private string m_DefaultRoomName = "Room";
-		public string DefaultRoomName{
-			get{ return m_DefaultRoomName = ( m_DefaultRoomName.Trim() == string.Empty ? ( Rooms != null && Rooms.Count > 0 ? Rooms[0] : "Room" ) : m_DefaultRoomName ); }
-			set{ m_DefaultRoomName = value; }
-		}
-
-		public bool RemoveIllegalCharacters = true;
-		public bool UseRegularExpressions = true;
-		public string IllegalCharactersSimple = "<>()[]{}!?\"'§$%&\\/*~+;:-=^°_";
-		public string IllegalCharactersRegex = "[^a-zA-Z 0-9'.@]";
-
-		public int MaxPlayersPerRoom = 16;
-		public string Version = "1";
-
-		public bool AutomaticallySyncScene = true;
-		public bool AutomaticallyCleanUpPlayerObjects = false;
-	}
-
 
 	public class ICEWorldNetworkManager : Photon.PunBehaviour
 	{
@@ -415,6 +65,11 @@ namespace ICE.Integration.Adapter
 		public NetworkManagerConnectionManagementObject Connection{
 			get{ return m_Connection = ( m_Connection== null?new NetworkManagerConnectionManagementObject():m_Connection ); }
 			set{ Connection.Copy( value ); }
+		}
+
+		private Camera m_ChildCamera = null;
+		private Camera ChildCamera{
+			get{ return m_ChildCamera = ( m_ChildCamera == null ? gameObject.GetComponentInChildren<Camera>() : m_ChildCamera ); }
 		}
 
 		public bool UseDebugLogs = false;
@@ -455,13 +110,15 @@ namespace ICE.Integration.Adapter
 
 		public virtual void Start()
 		{
-			if( Connection.AutoConnect || m_StayConnected )
-				Connect();
-			
 			if( UseDontDestroyOnLoad )
-				DontDestroyOnLoad( this );
+				DontDestroyOnLoad( transform.root.gameObject );
+
 
 			PhotonNetwork.logLevel = ( UsePhotonDebugLogs ? PhotonLogLevel.Full : PhotonLogLevel.ErrorsOnly );
+
+			if( Connection.AutoConnect || m_StayConnected )
+				Connect();
+
 		}
 			
 		/// <summary>
@@ -488,12 +145,12 @@ namespace ICE.Integration.Adapter
 
 			if( DisplayOptions.DropdownScreen != null ){
 				DisplayOptions.DropdownScreen.onValueChanged.RemoveAllListeners();
-				DisplayOptions.DropdownScreen.onValueChanged.AddListener( delegate { GUIChangedScreen(); });
+				DisplayOptions.DropdownScreen.onValueChanged.AddListener( delegate { OnGUIChangedScreen(); });
 			}
 
 			if( DisplayOptions.DropdownQuality != null ){
 				DisplayOptions.DropdownQuality.onValueChanged.RemoveAllListeners();
-				DisplayOptions.DropdownQuality.onValueChanged.AddListener( delegate { GUIChangedQuality(); });
+				DisplayOptions.DropdownQuality.onValueChanged.AddListener( delegate { OnGUIChangedQuality(); });
 			}
 
 			if( DisplayOptions.ButtonConnect != null ){
@@ -545,12 +202,60 @@ namespace ICE.Integration.Adapter
 			DisplayOptions.UpdateStatusColor();
 		}
 
+		private float m_LogOnTimeOut = 5.0f; 
+		private int m_ConnectionAttemptsMaximum = 10;
+		private int m_ConnectionAttempts = 0;
+		private bool m_ConnectionTimerActive = false;
+		private float m_ConnectionTimer = 0;
+
+		private void UpdateDisplay( BasicNetworkStatus _state = BasicNetworkStatus.Undefined )
+		{
+			if( _state == BasicNetworkStatus.Undefined )
+			{
+				switch( PhotonNetwork.connectionStateDetailed )
+				{
+				case ClientState.Queued:
+				case ClientState.QueuedComingFromGameserver:
+				case ClientState.Disconnecting:
+				case ClientState.DisconnectingFromMasterserver:
+				case ClientState.DisconnectingFromNameServer:
+				case ClientState.DisconnectingFromGameserver:
+				case ClientState.Authenticating:
+				case ClientState.ConnectingToMasterserver:
+				case ClientState.ConnectingToNameServer:
+				case ClientState.ConnectingToGameserver:		
+				case ClientState.Joining:
+				case ClientState.Leaving:
+					_state = BasicNetworkStatus.Connecting;
+					break;
+				case ClientState.Authenticated:
+				case ClientState.ConnectedToNameServer:			
+				case ClientState.ConnectedToMaster:
+				case ClientState.ConnectedToGameserver:
+					_state = BasicNetworkStatus.Connected;
+					break;
+				case ClientState.Uninitialized:
+					_state = BasicNetworkStatus.Disconnected;
+					break;
+				case ClientState.PeerCreated:
+				case ClientState.Disconnected:
+					_state = BasicNetworkStatus.Disconnected;
+					break;
+				case ClientState.JoinedLobby:
+					_state = BasicNetworkStatus.LobbyJoined;
+					break;
+				case ClientState.Joined:
+					_state = BasicNetworkStatus.RoomJoined;
+					break;
+				}
+			}
+
+			DisplayOptions.SetColorByNetworkStatus( _state );
+		}
+
 		protected virtual void UpdateConnectionState()
 		{
 			ClientState _state = PhotonNetwork.connectionStateDetailed;
-
-			//if( _state != ClientState.Joined )
-				//ICEDebug.LogInfo( "PhotonNetwork.automaticallySyncScene " + PhotonNetwork.automaticallySyncScene.ToString() , UseDebugLogs );
 
 			if( ICEWorldInfo.IsMultiplayer != Connection.UseMultiplayer )
 			{
@@ -586,7 +291,7 @@ namespace ICE.Integration.Adapter
 						break;
 				}
 
-				DisplayOptions.SetColorByNetworkStatus();
+				UpdateDisplay();
 
 				DisplayOptions.Log( _msg );
 
@@ -597,6 +302,7 @@ namespace ICE.Integration.Adapter
 
 				m_ClientState = _state;
 			}
+
 
 			if( DisplayOptions.StatusPanel != null && ! DisplayOptions.StatusPanel.gameObject.activeSelf ) 
 				DisplayOptions.StatusPanel.gameObject.SetActive( true );
@@ -664,6 +370,9 @@ namespace ICE.Integration.Adapter
 			{
 				string _name = DisplayOptions.InputFieldPlayerName.text;
 
+				if( string.IsNullOrEmpty( _name ) )
+					_name = Connection.DefaultPlayerName;
+
 				_name = RemoveIllegalCharacters( _name );
 
 				string _r = "#";
@@ -672,7 +381,10 @@ namespace ICE.Integration.Adapter
 					_name = _name + _r;
 
 				DisplayOptions.InputFieldPlayerName.text = _name;
-			}				
+
+				if( InsideLobby )
+					PhotonNetwork.player.NickName = _name;
+			}			
 		}
 
 		public void OnGUIConnect(){
@@ -702,7 +414,7 @@ namespace ICE.Integration.Adapter
 		/// <summary>
 		/// GUI changed quality mode.
 		/// </summary>
-		public void GUIChangedQuality()
+		public void OnGUIChangedQuality()
 		{
 			if( DisplayOptions.DropdownQuality != null )
 			{
@@ -714,7 +426,7 @@ namespace ICE.Integration.Adapter
 		/// <summary>
 		/// GUI changed sreen mode.
 		/// </summary>
-		public void GUIChangedScreen()
+		public void OnGUIChangedScreen()
 		{
 			if( DisplayOptions.DropdownScreen != null )
 			{
@@ -793,6 +505,8 @@ namespace ICE.Integration.Adapter
 			if( PhotonNetwork.connectionStateDetailed == ClientState.Disconnected || PhotonNetwork.connectionStateDetailed == ClientState.PeerCreated )
 				return;
 
+			ICEDebug.LogAction( "Disconnect() - This client will disconnect now the connection." );
+
 	#if ICE_UFPS_MP
 			if( vp_MPConnection.Instance != null )
 				vp_MPConnection.Instance.Disconnect();		
@@ -810,6 +524,12 @@ namespace ICE.Integration.Adapter
 		{
 			if( ! Connection.HandleConnection || DisplayOptions.LobbyPanel == null ) 
 				return;
+
+			ICEDebug.LogAction( "ShowLobby() - This client will display the lobby window." );
+
+
+			if( DisplayOptions.InputFieldPlayerName != null && string.IsNullOrEmpty( DisplayOptions.InputFieldPlayerName.text ) )
+				DisplayOptions.InputFieldPlayerName.text = Connection.DefaultPlayerName;
 
 			if( DisplayOptions.DropdownRooms != null )
 			{
@@ -854,7 +574,7 @@ namespace ICE.Integration.Adapter
 			if( ! Connection.HandleConnection )
 				return;
 
-			ICEDebug.LogAction( "TryJoinRandomRoom() - This client will be trying now to join a random room directly while connected to master." );
+			ICEDebug.LogAction( "TryJoinRandomRoom() - This client will try now to join a random room directly while connected to master." );
 			PhotonNetwork.JoinRandomRoom();
 		}
 
@@ -868,6 +588,8 @@ namespace ICE.Integration.Adapter
 		/// The room list gets available when OnReceivedRoomListUpdate() gets called after OnJoinedLobby().</remarks>
 		public override void OnJoinedLobby()
 		{
+			PhotonNetwork.player.NickName = Connection.DefaultPlayerName;
+
 			m_HasJoinedLobby = true;
 			ICEDebug.LogInfo("OnJoinedLobby() - This client has joined the lobby and will waiting now to receive the room list update." , UseDebugLogs );
 			if( ! Connection.HandleConnection )
@@ -881,7 +603,7 @@ namespace ICE.Integration.Adapter
 		public override void OnReceivedRoomListUpdate()
 		{
 			m_ReceivedRoomListUpdate = true;
-			ICEDebug.LogInfo( "OnReceivedRoomListUpdate() - This client has received the updated room list from the joined lobby." );
+			ICEDebug.LogInfo( "OnReceivedRoomListUpdate() - This client has received the updated room list from the joined lobby.", UseDebugLogs );
 			if( ! Connection.HandleConnection )
 				return;
 
@@ -918,14 +640,20 @@ namespace ICE.Integration.Adapter
 				foreach( RoomInfo _info in PhotonNetwork.GetRoomList() )
 				{
 					if( _info.Name == _room_name )
+					{
+						ICEDebug.LogAction( "TryJoinOrCreateRandomRoom() - This client will try now to join room '" + _info.Name + "'." );
 						return PhotonNetwork.JoinRoom( _info.Name );
+					}
 				}
 
+				ICEDebug.LogAction( "TryJoinOrCreateRandomRoom() - This client will try now to create room '" + _room_name + "'." );
 				return PhotonNetwork.CreateRoom( _room_name );
 			}
 			else
 			{
-				return PhotonNetwork.JoinRoom( Connection.DefaultRoomName + ( PhotonNetwork.countOfRooms ).ToString() );
+				string _room_name = Connection.DefaultRoomName + ( PhotonNetwork.countOfRooms ).ToString();
+				ICEDebug.LogAction( "TryJoinOrCreateRandomRoom() - This client will try now to join room '" + _room_name + "'." );
+				return PhotonNetwork.JoinRoom( _room_name );
 			}
 		}
 
@@ -945,7 +673,10 @@ namespace ICE.Integration.Adapter
 				if( _info.Name == _desired_room_name )
 				{
 					if( _info.IsOpen && _info.PlayerCount < _info.MaxPlayers )
+					{
+						ICEDebug.LogAction( "TryJoinCertainRoom() - This client will try now to join room '" + _info.Name  + "'." );
 						return PhotonNetwork.JoinRoom( _info.Name );
+					}
 					else
 					{
 						DisplayOptions.Log( "Joining " + _desired_room_name + " is not available!" );
@@ -969,9 +700,11 @@ namespace ICE.Integration.Adapter
 
 		public override void OnFailedToConnectToPhoton(DisconnectCause cause)
 		{
-			//DisplayOptions.SetColorByNetworkStatus( BasicNetworkStatus.Error );
+			DisplayOptions.SetColorByNetworkStatus( BasicNetworkStatus.Error );
 			ICEDebug.LogError( "OnFailedToConnectToPhoton() - The connection to Photon failed : " + cause );
 		}
+
+		public bool UseUFPSMP_vp_MPMaster = false;
 
 		public override void OnJoinedRoom()
 		{
@@ -982,44 +715,44 @@ namespace ICE.Integration.Adapter
 			if( PhotonNetwork.isMasterClient )
 				PhotonNetwork.room.MaxPlayers = Connection.MaxPlayersPerRoom;
 
-	#if ICE_UFPS
-
-
-			if( ! PhotonNetwork.isMasterClient)
+			#if ICE_UFPS_MP
+			if( UseUFPSMP_vp_MPMaster )
 			{
-				PhotonNetwork.automaticallySyncScene = true;
-				PhotonNetwork.LoadLevel( vp_MPMaster.Instance.CurrentLevel );
+				if( ! PhotonNetwork.isMasterClient )
+					PhotonNetwork.LoadLevel( vp_MPMaster.Instance.CurrentLevel );
+
+				// send spawn request to master client
+				string name = "Unnamed";
+
+				// sent as RPC instead of in 'OnPhotonPlayerConnected' because the
+				// MasterClient does not run the latter for itself + we don't want
+				// to do the request on all clients
+
+				if( FindObjectOfType<vp_MPMaster>() )	// in rare cases there might not be a vp_MPMaster, for example: a chat lobby
+					photonView.RPC( "RequestInitialSpawnInfo", PhotonTargets.MasterClient, PhotonNetwork.player, 0, name );
+
+				vp_Gameplay.IsMaster = PhotonNetwork.isMasterClient;
+
+				return;
 			}
+			#endif
+			
+			LoadScene();
 
-			// TODO: use PhotonNetwork.LoadLevel to load level while automatically pausing network queue
-			// ("call this in OnJoinedRoom to make sure no cached RPCs are fired in the wrong scene")
-			// also, get level from room properties / master
 
-			// send spawn request to master client
-			string name = "Unnamed";
-
-			// sent as RPC instead of in 'OnPhotonPlayerConnected' because the
-			// MasterClient does not run the latter for itself + we don't want
-			// to do the request on all clients
-
-			if(FindObjectOfType<vp_MPMaster>())	// in rare cases there might not be a vp_MPMaster, for example: a chat lobby
-				photonView.RPC("RequestInitialSpawnInfo", PhotonTargets.MasterClient, PhotonNetwork.player, 0, name);
-
-			vp_Gameplay.IsMaster = PhotonNetwork.isMasterClient;
-	#endif
 		}
 
 
 
 		void OnPhotonCreateRoomFailed()
 		{
-			DisplayOptions.SetColorByNetworkStatus( BasicNetworkStatus.Error );
+			UpdateDisplay( BasicNetworkStatus.Error );
 			ICEDebug.LogInfo("OnPhotonCreateRoomFailed() got called. This can happen if the room exists (even if not visible). Try another room name.", UseDebugLogs );
 		}
 
 		public override void OnPhotonJoinRoomFailed(object[] cause)
 		{
-			DisplayOptions.SetColorByNetworkStatus( BasicNetworkStatus.Error );
+			UpdateDisplay( BasicNetworkStatus.Error );
 			ICEDebug.LogInfo( "OnPhotonJoinRoomFailed got called. This can happen if the room is not existing or full or closed.", UseDebugLogs );
 		}
 
@@ -1053,21 +786,34 @@ namespace ICE.Integration.Adapter
 			//ICEWorldInfo.IsMasterClient = PhotonNetwork.isMasterClient;
 		}
 
+		/// <summary>
+		/// Loads the menu.
+		/// </summary>
 		private void LoadMenu()
 		{
-			if( ! SceneManagement.UseSceneManagement )
+			if( ! SceneManagement.UseSceneManagement || string.IsNullOrEmpty( SceneManagement.SceneNameMenu ) )
 				return;
 			
 			ICEDebug.LogInfo("LoadMenu() ... loading menu scene '" + SceneManagement.SceneNameMenu + "'!", UseDebugLogs );
 			SceneManager.LoadScene( SceneManagement.SceneNameMenu );
 		}
 
+		/// <summary>
+		/// Loads the scene.
+		/// </summary>
 		private void LoadScene()
 		{
-			if( ! SceneManagement.UseSceneManagement )
+			if( ! SceneManagement.UseSceneManagement || string.IsNullOrEmpty( SceneManagement.SceneNameGame ) )
 				return;
 
-			ICEDebug.LogInfo("LoadScene() ... loading game scene '" + SceneManagement.SceneNameGame + "'!", UseDebugLogs );
+			if ( ! PhotonNetwork.isMasterClient ) 
+				ICEDebug.LogWarning( "LoadScene() : This Client is trying to Load the '" + SceneManagement.SceneNameGame + "' level but we are not the master client." );
+		
+
+			ICEDebug.LogAction("LoadScene() : This Client is loading now the game scene '" + SceneManagement.SceneNameGame + "'!", UseDebugLogs );
+
+			if( ChildCamera != null )
+				ChildCamera.enabled = false;
 
 			if( ICEWorldInfo.IsMultiplayer )
 				PhotonNetwork.LoadLevel( SceneManagement.SceneNameGame );

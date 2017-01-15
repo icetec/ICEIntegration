@@ -25,6 +25,7 @@ using ICE.World;
 using ICE.World.EditorUtilities;
 
 using ICE.Integration;
+using ICE.Integration.Objects;
 using ICE.Integration.EditorInfos;
 
 #if ICE_CC
@@ -54,10 +55,9 @@ namespace ICE.Integration.Adapter
 
 		public void DrawAdapterContent( ICEWorldNetworkManager _adapter )
 		{
-			PhotonView m_PhotonView = _adapter.GetComponent<PhotonView>(); 
-
 			ICECreatureEntity m_Entity = _adapter.GetComponent<ICECreatureEntity>(); 
 
+			PhotonView m_PhotonView = _adapter.GetComponent<PhotonView>(); 
 			EditorGUI.BeginDisabledGroup( m_PhotonView != null );
 				GUI.backgroundColor = ( m_PhotonView == null ? Color.yellow : Color.green );			
 				if( ICEEditorLayout.Button( "Photon View", "", ICEEditorStyle.ButtonExtraLarge ) )
@@ -148,6 +148,7 @@ namespace ICE.Integration.Adapter
 			ICEEditorLayout.EndHorizontal( "" );
 			EditorGUILayout.Separator();
 
+			_options.DefaultPlayerName = ICEEditorLayout.Text( "Default Player Name" , "", _options.DefaultPlayerName, "" );
 			_options.MaxPlayersPerRoom = ICEEditorLayout.IntField( "Max. Players Per Room", "", _options.MaxPlayersPerRoom, "" );
 			EditorGUILayout.Separator();
 
@@ -216,16 +217,23 @@ namespace ICE.Integration.Adapter
 			if( _options.FoldoutStatusPanel )
 			{		
 				EditorGUI.indentLevel++;
-					_options.StatusPanel = (RectTransform)EditorGUILayout.ObjectField("Status Panel", _options.StatusPanel, typeof(RectTransform), true);
-					EditorGUILayout.Separator();
 
+					GUI.backgroundColor = ( _options.StatusPanel == null ? Color.red : Color.green );
+					_options.StatusPanel = (RectTransform)EditorGUILayout.ObjectField("Status Panel", _options.StatusPanel, typeof(RectTransform), true);
+	
+					GUI.backgroundColor = ( _options.ImageStatus == null ? Color.yellow : Color.green );
 					_options.ImageStatus = (Image)EditorGUILayout.ObjectField("Status Image", _options.ImageStatus, typeof(Image), true);
+	
+					GUI.backgroundColor = ( _options.ImageMaster == null ? Color.yellow : Color.green );
 					_options.ImageMaster = (Image)EditorGUILayout.ObjectField("Master Image", _options.ImageMaster, typeof(Image), true);
-					EditorGUILayout.Separator();
+
+					GUI.backgroundColor = ( _options.TextStatus == null ? Color.yellow : Color.green );
 					_options.TextStatus = (Text)EditorGUILayout.ObjectField("Status Text", _options.TextStatus, typeof(Text), true);
-					EditorGUILayout.Separator();
+	
+					GUI.backgroundColor = ( _options.ButtonDisconnect == null ? Color.yellow : Color.green );
 					_options.ButtonDisconnect = (Button)EditorGUILayout.ObjectField("Disconnect Button", _options.ButtonDisconnect, typeof(Button), true);
 
+					GUI.backgroundColor = ICEEditorLayout.DefaultBackgroundColor;
 					EditorGUILayout.Separator();
 
 					EditorGUI.BeginDisabledGroup( _options.ImageStatus == null );
@@ -265,36 +273,48 @@ namespace ICE.Integration.Adapter
 			if( _options.FoldoutLobbyPanel )
 			{
 				EditorGUI.indentLevel++;
+					GUI.backgroundColor = ( _options.LobbyPanel == null ? Color.red : Color.green );
 					_options.LobbyPanel = (RectTransform)EditorGUILayout.ObjectField("Lobby Panel", _options.LobbyPanel, typeof(RectTransform), true);
 
-					EditorGUILayout.Separator();
+					GUI.backgroundColor = ( _options.InputFieldPlayerName == null ? Color.yellow : Color.green );
 					_options.InputFieldPlayerName = (InputField)EditorGUILayout.ObjectField("Input Field", _options.InputFieldPlayerName, typeof(InputField), true);
-
-					EditorGUILayout.Separator();			
+					
+					GUI.backgroundColor = ( _options.DropdownRooms == null ? Color.yellow : Color.green );		
 					_options.DropdownRooms = (Dropdown)EditorGUILayout.ObjectField("Rooms Dropdown", _options.DropdownRooms, typeof(Dropdown), true);
+
+					GUI.backgroundColor = ( _options.ToggleJoinRandomRoom == null ? Color.yellow : Color.green );
 					_options.ToggleJoinRandomRoom = (Toggle)EditorGUILayout.ObjectField("Random Room Toggle", _options.ToggleJoinRandomRoom, typeof(Toggle), true);
 
-					EditorGUILayout.Separator();
+					GUI.backgroundColor = ( _options.DropdownQuality == null ? Color.yellow : Color.green );
 					_options.DropdownQuality = (Dropdown)EditorGUILayout.ObjectField("Quality Dropdown", _options.DropdownQuality, typeof(Dropdown), true);
+					
+					GUI.backgroundColor = ( _options.DropdownScreen == null ? Color.yellow : Color.green );
 					_options.DropdownScreen = (Dropdown)EditorGUILayout.ObjectField("Screen Dropdown", _options.DropdownScreen, typeof(Dropdown), true);
 
-					EditorGUILayout.Separator();
+					GUI.backgroundColor = ( _options.ButtonJoin == null ? Color.yellow : Color.green );
 					_options.ButtonJoin = (Button)EditorGUILayout.ObjectField("Join Button", _options.ButtonJoin, typeof(Button), true);
+
+					GUI.backgroundColor = ICEEditorLayout.DefaultBackgroundColor;
+					EditorGUILayout.Separator();
 				EditorGUI.indentLevel--;
-				EditorGUILayout.Separator();
 			}
 
 			_options.FoldoutConnectPanel = ICEEditorLayout.Foldout( _options.FoldoutConnectPanel, "Connect",  false );
 			if( _options.FoldoutConnectPanel )
 			{
 				EditorGUI.indentLevel++;
+					GUI.backgroundColor = ( _options.ConnectionPanel == null ? Color.red : Color.green );
 					_options.ConnectionPanel = (RectTransform)EditorGUILayout.ObjectField("Connect Panel", _options.ConnectionPanel, typeof(RectTransform), true);
 
+					GUI.backgroundColor = ( _options.ToggleRandomConnect == null ? Color.yellow : Color.green );
 					_options.ToggleRandomConnect = (Toggle)EditorGUILayout.ObjectField("Random Connect Toggle", _options.ToggleRandomConnect, typeof(Toggle), true);
-					EditorGUILayout.Separator();
+
+					GUI.backgroundColor = ( _options.ButtonConnect == null ? Color.yellow : Color.green );
 					_options.ButtonConnect = (Button)EditorGUILayout.ObjectField("Connect Button", _options.ButtonConnect, typeof(Button), true);
-				EditorGUI.indentLevel--;
+
+					GUI.backgroundColor = ICEEditorLayout.DefaultBackgroundColor;
 				EditorGUILayout.Separator();
+				EditorGUI.indentLevel--;
 			}
 			
 

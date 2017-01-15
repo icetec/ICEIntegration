@@ -1,4 +1,4 @@
-﻿// ##############################################################################
+// ##############################################################################
 //
 // ICEWorldNetworkView.cs
 // Version 1.3.6
@@ -84,6 +84,9 @@ namespace ICE.Integration.Adapter
 				ICEDebug.LogWarning( this + " is not observed by this object's photonView! OnPhotonSerializeView() in this class won't be used." );
 			}
 
+			
+			TransmitWakeUp();
+
 			if( Entity != null )
 				Entity.IsLocal = photonView.isMine;
 		}
@@ -98,6 +101,23 @@ namespace ICE.Integration.Adapter
 				transform.position = Vector3.Lerp( transform.position, m_SyncEndPosition, Time.deltaTime * this.SycnMovementSmoothingDelay );
 				transform.rotation = Quaternion.Lerp( transform.rotation, m_SyncEndRotation, Time.deltaTime * this.SycnMovementSmoothingDelay );
 			}
+		}
+
+		public void TransmitWakeUp()
+		{
+			GetComponent<PhotonView>().RPC("ReceiveWakeUp", PhotonTargets.AllBufferedViaServer );
+		}
+
+
+
+
+		[PunRPC]
+		public void ReceiveWakeUp(PhotonMessageInfo info){
+
+			//if( Application.isEditor )
+			//	Debug.Break();
+			
+			Debug.Log("ReceivedWakeUp " + transform.name + " (" + transform.GetInstanceID() + " = " + photonView.viewID + " isMine:" + photonView.isMine + " MASTER :" + PhotonNetwork.isMasterClient + ")" );
 		}
 
 		public virtual void OnPhotonSerializeView( PhotonStream stream, PhotonMessageInfo info )
