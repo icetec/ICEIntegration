@@ -1,7 +1,7 @@
 ﻿// ##############################################################################
 //
 // ICE.World.Objects.ice_objects_integration_network.cs 
-// Version 1.3.6
+// Version 1.3.7
 //
 // Copyrights © Pit Vetterick, ICE Technologies Consulting LTD. All Rights Reserved.
 // http://www.icecreaturecontrol.com
@@ -28,7 +28,9 @@
 
 using UnityEngine;
 using UnityEngine.UI;
+#if UNITY_5_3 || UNITY_5_3_OR_NEWER
 using UnityEngine.SceneManagement;
+#endif
 
 using System.Collections;
 using System.Collections.Generic;
@@ -123,10 +125,20 @@ namespace ICE.Integration.Objects
 		private Dropdown ValidateQuality()
 		{
 			List<string> _options = new List<string>( QualityOptions );
-			if( m_DropdownQuality != null && m_DropdownQuality.options.Count != _options.Count )
+			if( m_DropdownQuality != null && m_DropdownQuality.options != null && m_DropdownQuality.options.Count != _options.Count )
 			{
+#if UNITY_5_3 || UNITY_5_3_OR_NEWER
 				m_DropdownQuality.ClearOptions(); 
 				m_DropdownQuality.AddOptions( _options );
+#else
+				
+				List<Dropdown.OptionData> _dd_options = new List<Dropdown.OptionData>();
+
+				foreach( string _text in _options )
+					_dd_options.Add( new Dropdown.OptionData( _text, null ) );
+
+				m_DropdownQuality.options = _dd_options;
+#endif
 			}
 
 			return m_DropdownQuality;
@@ -145,10 +157,17 @@ namespace ICE.Integration.Objects
 		private Dropdown ValidateScreen()
 		{
 			List<string> _options = new List<string>( ScreenOptions );
-			if( m_DropdownScreen != null && m_DropdownScreen.options.Count != _options.Count )
+			if( m_DropdownScreen != null && m_DropdownScreen.options != null && m_DropdownScreen.options.Count != _options.Count )
 			{
+#if UNITY_5_3 || UNITY_5_3_OR_NEWER
 				m_DropdownScreen.ClearOptions(); 
 				m_DropdownScreen.AddOptions( _options );
+#else
+				List<Dropdown.OptionData> _new_options = new List<Dropdown.OptionData>();				
+				foreach( string _text in _options )
+					_new_options.Add( new Dropdown.OptionData( _text, null ) );				
+				m_DropdownScreen.options = _new_options;
+#endif
 			}
 
 			return m_DropdownScreen;

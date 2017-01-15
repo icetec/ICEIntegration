@@ -1,7 +1,7 @@
 ﻿// ##############################################################################
 //
 // ICEWorldNetworkChat.cs
-// Version 1.3.6
+// Version 1.3.7
 //
 // © Pit Vetterick, ICE Technologies Consulting LTD. All Rights Reserved.
 // http://www.ice-technologies.com
@@ -14,7 +14,9 @@
 
 using UnityEngine;
 using UnityEngine.UI;
+#if UNITY_5_3 || UNITY_5_3_OR_NEWER
 using UnityEngine.SceneManagement;
+#endif
 
 using System.Collections;
 using System.Collections.Generic;

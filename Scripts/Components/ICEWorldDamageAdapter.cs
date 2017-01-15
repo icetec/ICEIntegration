@@ -1,7 +1,7 @@
 ﻿// ##############################################################################
 //
 // ICEWorldDamageAdapter.cs
-// Version 1.3.6
+// Version 1.3.7
 //
 // © Pit Vetterick, ICE Technologies Consulting LTD. All Rights Reserved.
 // http://www.ice-technologies.com

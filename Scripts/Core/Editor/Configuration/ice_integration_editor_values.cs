@@ -1,7 +1,7 @@
 // ##############################################################################
 //
 // ice_integration_editor_values.cs | Init
-// Version 1.3.6
+// Version 1.3.7
 //
 // Copyrights © Pit Vetterick, ICE Technologies Consulting LTD. All Rights Reserved.
 // http://www.icecreaturecontrol.com
