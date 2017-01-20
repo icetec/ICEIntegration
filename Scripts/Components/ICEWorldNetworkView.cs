@@ -108,9 +108,6 @@ namespace ICE.Integration.Adapter
 			GetComponent<PhotonView>().RPC("ReceiveWakeUp", PhotonTargets.AllBufferedViaServer );
 		}
 
-
-
-
 		[PunRPC]
 		public void ReceiveWakeUp(PhotonMessageInfo info){
 

@@ -46,6 +46,12 @@ namespace ICE.Integration.Menus
 {
 	public class ICEIntegrationTools : AssetPostprocessor
 	{
+		/*
+		static ICEIntegrationTools()
+		{
+			ValidateDefines();
+		}*/
+
 		/// <summary>
 		/// Custom ICE asset defines to add based on the file and keyword to detect the asset and the desired platforms
 		/// </summary>
@@ -99,11 +105,6 @@ namespace ICE.Integration.Menus
 			}
 		}
 
-		/*
-		static ice_editor_defines()
-		{
-			ValidateDefines();
-		}*/
 
 		public static void ValidateDefines()
 		{
@@ -184,11 +185,7 @@ namespace ICE.Integration.Menus
 
 					_defines += _new_define_compile_constant;
 
-					try {
-						PlayerSettings.SetScriptingDefineSymbolsForGroup( _group, _defines );
-					} catch {
-						ICEDebug.LogError( "Can't add define '" + _new_define_compile_constant + "' for BuildTargetGroup '" + _group.ToString() + "'" );
-					}
+					PlayerSettings.SetScriptingDefineSymbolsForGroup( _group, _defines );
 
 				}
 			}
@@ -223,11 +220,7 @@ namespace ICE.Integration.Menus
 				//remove the constant and it's associated semicolon (if necessary)
 				_defines = _defines.Remove( _index, _length_to_remove );
 
-				try {
-					PlayerSettings.SetScriptingDefineSymbolsForGroup( _group, _defines );
-				} catch {
-					ICEDebug.LogError( "Can't remove define '" + _define_compile_constant + "' for BuildTargetGroup '" + _group.ToString() + "'" );
-				}
+				PlayerSettings.SetScriptingDefineSymbolsForGroup( _group, _defines );
 
 			}
 		}
