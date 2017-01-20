@@ -16,7 +16,7 @@ using UnityEngine;
 using ICE;
 using ICE.Creatures;
 
-#if PLAYMAKER && ICE_CC 
+#if ICE_PLAYMAKER && ICE_CC 
 namespace HutongGames.PlayMaker.Actions
 {
 	[ActionCategoryAttribute("ICE")]
