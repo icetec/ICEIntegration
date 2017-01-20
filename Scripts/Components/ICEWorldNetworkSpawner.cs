@@ -37,8 +37,11 @@ using ICE.Creatures.EnumTypes;
 namespace ICE.Integration.Adapter
 {
 #if ICE_PUN && ICE_CC
-	public class ICEWorldNetworkSpawner : Photon.PunBehaviour {
-
+	public class ICEWorldNetworkSpawner : Photon.PunBehaviour
+#else
+	public class ICEWorldNetworkSpawner : ICEWorldNetworkBehaviour 
+#endif
+	{
 		private ICEWorldRegister m_Register = null;
 		protected ICEWorldRegister Register{
 			get{ return m_Register = ( m_Register == null ? ICEWorldRegister.Instance : m_Register ); }
@@ -52,6 +55,28 @@ namespace ICE.Integration.Adapter
 				return WaitForUFPSMP;
 			}
 		}
+
+		public bool InRoom{
+			get{
+				#if ICE_PUN
+				return PhotonNetwork.inRoom;
+				#else
+				return false;
+				#endif
+			}
+		}
+
+		public bool IsMasterClient{
+			get{
+				#if ICE_PUN
+				return PhotonNetwork.isMasterClient;
+				#else
+				return false;
+				#endif
+			}
+		}
+
+
 
 		protected virtual void Awake()
 		{
@@ -84,38 +109,21 @@ namespace ICE.Integration.Adapter
 		{
 			ICEWorldInfo.IsMultiplayer = true;
 
-			if( ! ICEWorldInfo.IsMultiplayer || ! PhotonNetwork.inRoom )
+			if( ! ICEWorldInfo.IsMultiplayer || ! InRoom )
 				return;
 			
-			if( ! WaitForExternalSpawnEvent && ! ICEWorldInfo.NetworkSpawnerReady && PhotonNetwork.inRoom )
+			if( ! WaitForExternalSpawnEvent && ! ICEWorldInfo.NetworkSpawnerReady && InRoom )
 				ICEWorldInfo.NetworkSpawnerReady = true;
+			#if ICE_UFPS_MP
 			else if( vp_MPMaster.Phase == vp_MPMaster.GamePhase.Playing )
 				ICEWorldInfo.NetworkSpawnerReady = true;
+			#endif
 		}
 
 		public override void OnJoinedRoom()
 		{
 			if( ! WaitForExternalSpawnEvent )
 				ICEWorldInfo.NetworkSpawnerReady = true;
-		}
-
-		/// <summary>
-		/// Receives the respawn - TransmitRespawnAll()
-		/// </summary>
-		/// <param name="position">Position.</param>
-		/// <param name="rotation">Rotation.</param>
-		/// <param name="info">Info.</param>
-		[PunRPC]
-		public virtual void ReceivePlayerRespawn( Vector3 position, Quaternion rotation, PhotonMessageInfo info )
-		{
-			ICEDebug.LogInfo( "Receive RPC PlayerRespawn from vp_MPMaster and set NetworkSpawnerReady to TRUE. Spawning will be available now." );
-			ICEWorldInfo.NetworkSpawnerReady = true;
-		}
-
-		[PunRPC]
-		public void ReceiveLoadLevel(string levelName, PhotonMessageInfo info)
-		{
-			ICEDebug.LogInfo( "Receive RPC LoadLevel from vp_MPMaster" );
 		}
 
 		public void OnInstantiateObject( out GameObject _object, GameObject _reference, Vector3 _position, Quaternion _rotation )
@@ -125,7 +133,7 @@ namespace ICE.Integration.Adapter
 
 			ICEWorldEntity _entity = _reference.GetComponent<ICEWorldEntity>();
 
-			if( PhotonNetwork.inRoom )
+			if( InRoom )
 			{
 				if( ! ICEWorldInfo.NetworkSpawnerReady )
 					ICEDebug.LogWarning( "NetworkSpawner in Room but not ready!" );
@@ -134,18 +142,17 @@ namespace ICE.Integration.Adapter
 				if( _entity != null && _entity.EntityType == ICE.World.EnumTypes.EntityClassType.Player )
 				{
 					ICEDebug.LogInfo( "Spawning Local Player '" + _reference.name + "' via PhotonNetwork." );
-					_object = (GameObject)PhotonNetwork.Instantiate( _reference.name, _position, _rotation, 0 );
+					_object = NetworkInstantiate( _reference.name, _position, _rotation ); 
 				}
 
 				// only the master client can spawn scene objects
-				else if( PhotonNetwork.isMasterClient )
+				else if( IsMasterClient )
 				{
 					if( _entity != null )
 						ICEDebug.LogInfo( "Spawning Scene " + _entity.EntityType.ToString() + " Entity '" + _reference.name + "' via PhotonNetwork." );
 					else
 						ICEDebug.LogInfo( "Spawning Scene Object '" + _reference.name + "' via PhotonNetwork." );
-
-					_object = (GameObject)PhotonNetwork.InstantiateSceneObject( _reference.name, _position, _rotation, 0, null ); 
+					_object = NetworkInstantiateSceneObject( _reference.name, _position, _rotation ); 
 				}
 			}
 			else if( ICEWorldInfo.IsMultiplayer == false )
@@ -159,6 +166,38 @@ namespace ICE.Integration.Adapter
 			}
 		}
 
+		private GameObject NetworkInstantiate( string _name, Vector3 _position, Quaternion _rotation )
+		{
+			#if ICE_PUN
+			return (GameObject)PhotonNetwork.Instantiate( _reference.name, _position, _rotation, 0 );
+			#else
+			return null;
+			#endif
+		}
+
+		private GameObject NetworkInstantiateSceneObject( string _name, Vector3 _position, Quaternion _rotation )
+		{
+			#if ICE_PUN
+			return (GameObject)PhotonNetwork.InstantiateSceneObject( _reference.name, _position, _rotation, 0, null ); 
+			#else
+			return null;
+			#endif
+		}
+
+		private bool NetworkDestroy( GameObject _object )
+		{
+			#if ICE_PUN
+			if( _object.GetComponent<PhotonView>() != null )
+			{
+				PhotonNetwork.Destroy( _object );
+				return true;
+			}
+			#else
+			return false;
+			#endif
+		}
+
+
 		/// <summary>
 		/// Raises the destroy object event.
 		/// </summary>
@@ -166,22 +205,16 @@ namespace ICE.Integration.Adapter
 		/// <param name="_destroyed">Destroyed.</param>
 		public void OnRemoveObject( GameObject _object, out bool _destroyed )
 		{
-			if( PhotonNetwork.isMasterClient == true && _object != null && _object.GetComponent<PhotonView>() != null )
-			{
-				PhotonNetwork.Destroy( _object );
-				_destroyed = true;
-			}
+			if( IsMasterClient == true && _object != null )
+				_destroyed = NetworkDestroy( _object );
 			else
 				_destroyed = false;
 		}
 
 		public void OnDestroyObject( GameObject _object, out bool _destroyed )
 		{
-			if( PhotonNetwork.isMasterClient == true && _object != null && _object.GetComponent<PhotonView>() != null )
-			{
-				PhotonNetwork.Destroy( _object );
-				_destroyed = true;
-			}
+			if( IsMasterClient == true && _object != null )
+				_destroyed = NetworkDestroy( _object );
 			else
 				_destroyed = false;
 		}
@@ -249,7 +282,12 @@ namespace ICE.Integration.Adapter
 
 			if( ! m_EntitiesByViewID.TryGetValue( _id, out _entity ) )
 			{
-				PhotonView _view = PhotonView.Find( _id );
+				#if ICE_PUN
+				Component _view = PhotonView.Find( _id ) as Component;
+				#else
+				Component _view = null;
+				#endif
+
 				if( _view != null )
 				{
 					_entity = _view.transform.GetComponent<ICEWorldEntity>();
@@ -262,9 +300,10 @@ namespace ICE.Integration.Adapter
 			return _entity;
 		}
 
+#if ICE_PUN
 		protected virtual void TransmitEntityDurability( Transform _target, Transform sourceTransform )
 		{
-			if( ! PhotonNetwork.isMasterClient )
+			if( ! IsMasterClient )
 				return;
 
 			// abort if the status will be synchronized by PhotonSerializeView
@@ -299,8 +338,19 @@ namespace ICE.Integration.Adapter
 			_entity.Status.SetDurability( _durability );
 
 		}
-	}
-#else
-	public class ICEWorldNetworkSpawner : ICEWorldBehaviour {}
+
+		[PunRPC]
+		public virtual void ReceivePlayerRespawn( Vector3 position, Quaternion rotation, PhotonMessageInfo info )
+		{
+		ICEDebug.LogInfo( "Receive RPC PlayerRespawn from vp_MPMaster and set NetworkSpawnerReady to TRUE. Spawning will be available now." );
+		ICEWorldInfo.NetworkSpawnerReady = true;
+		}
+
+		[PunRPC]
+		public void ReceiveLoadLevel(string levelName, PhotonMessageInfo info)
+		{
+		ICEDebug.LogInfo( "Receive RPC LoadLevel from vp_MPMaster" );
+		}
 #endif
+	}
 }
