@@ -32,11 +32,99 @@ using ICE.Creatures.EnumTypes;
 #if ICE_ASTAR
 using Pathfinding;
 using Pathfinding.RVO;
+#elif ICE_APEX
+using Apex;
+using Apex.Steering;
 #endif
 
 namespace ICE.Integration.Adapter
 {
-#if ICE_ASTAR && ICE_CC
+#if ICE_APEX && ICE_CC
+	public class ICEWorldPathfindingAdapter : ICEWorldBehaviour {
+
+		private ICECreatureControl m_Controller = null;
+		protected ICECreatureControl AttachedCreatureController{
+		get{ return m_Controller = ( m_Controller == null ? GetComponent<ICECreatureControl>() : m_Controller ); }
+		}
+
+		private CharacterController m_CharacterController = null;
+		protected CharacterController AttachedCharacterController{
+			get{ return m_CharacterController = ( m_CharacterController == null ? GetComponent<CharacterController>() : m_CharacterController ); }
+		}
+
+		private Rigidbody m_Rigidbody = null;
+		protected Rigidbody AttachedRigidbody{
+			get{ return m_Rigidbody = ( m_Rigidbody == null ? GetComponent<Rigidbody>() : m_Rigidbody ); }
+		}
+
+		private IMovable m_Unit = null;
+		protected IMovable m_AttachedUnit{
+			get{ return m_Unit = ( m_Unit == null ? this.As<IMovable>() : m_Unit ); }
+		}
+
+		private Vector3 m_CurrentMovePosition = Vector3.zero;
+
+		void OnMoveComplete( GameObject _sender, TargetObject _target  )
+		{
+
+		}
+
+		void OnMoveUpdatePosition(  GameObject _sender, Vector3 _origin_position, ref Vector3 _new_position )
+		{
+
+		}
+
+		void OnTargetMovePositionReached( GameObject _sender, TargetObject _target )
+		{
+		}
+
+		void OnCustomMove( GameObject _sender, ref Vector3 _new_position, ref Quaternion _new_rotation )
+		{
+			if( m_AttachedUnit == null )
+				return;
+			
+			if( _new_position != m_CurrentMovePosition )
+			{
+				m_CurrentMovePosition = _new_position;
+				m_AttachedUnit.MoveTo( _new_position, false );	
+			}
+			else
+				m_CurrentMovePosition = _new_position;
+		}
+
+		/// <summary>
+		/// Raises the enable event and starts RepeatTrySearchPath.
+		/// </summary>
+		/// <description>
+		/// Starts RepeatTrySearchPath.
+		/// </description>
+		protected virtual void OnEnable () {
+
+			if( AttachedCreatureController != null )
+			{
+				AttachedCreatureController.Creature.Move.OnTargetMovePositionReached += OnTargetMovePositionReached;
+				AttachedCreatureController.Creature.Move.OnMoveComplete += OnMoveComplete;
+				AttachedCreatureController.Creature.Move.OnUpdateMovePosition += OnMoveUpdatePosition;
+				AttachedCreatureController.Creature.Move.OnCustomMove += OnCustomMove;
+			}
+
+		}
+
+		/// <summary>
+		/// Raises the disable event.
+		/// </summary>
+		public void OnDisable () 
+		{		
+			if( AttachedCreatureController != null )
+			{
+				AttachedCreatureController.Creature.Move.OnTargetMovePositionReached -= OnTargetMovePositionReached;
+				AttachedCreatureController.Creature.Move.OnMoveComplete -= OnMoveComplete;
+				AttachedCreatureController.Creature.Move.OnUpdateMovePosition -= OnMoveUpdatePosition;
+				AttachedCreatureController.Creature.Move.OnCustomMove -= OnCustomMove;
+			}
+		}
+	}
+#elif ICE_ASTAR && ICE_CC
 	[RequireComponent(typeof(ICECreatureControl))]
 	[RequireComponent(typeof(Seeker))]
 	public class ICEWorldPathfindingAdapter : ICEWorldBehaviour {

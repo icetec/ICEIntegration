@@ -56,6 +56,8 @@ namespace ICE.Integration.Menus
 		static bool ValidateAddAstarAdapter(){
 			#if ICE_ASTAR && ICE_CC
 			return true;
+			#elif ICE_APEX && ICE_CC
+			return true;
 			#else
 			return false;
 			#endif
@@ -82,6 +84,8 @@ namespace ICE.Integration.Menus
 		[MenuItem ( "ICE/ICE Integration/Pathfinding/Remove Pathfinding Adapters", true)]
 		static bool ValidateRemoveAstarAdapter(){
 			#if ICE_ASTAR && ICE_CC
+			return true;
+			#elif ICE_APEX && ICE_CC
 			return true;
 			#else
 			return false;

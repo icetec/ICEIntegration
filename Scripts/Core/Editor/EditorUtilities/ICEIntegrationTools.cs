@@ -62,6 +62,7 @@ namespace ICE.Integration.Menus
 			new AssetDefine("ICEEnvironment.cs", "", true, null, "ICE_ENV" ),
 			new AssetDefine("PhotonNetwork.cs", "", true, null, "ICE_PUN" ),
 			new AssetDefine("AstarPath.cs", "", true, null, "ICE_ASTAR" ),
+			new AssetDefine("ApexShared.dll", "", true, null, "ICE_APEX" ),
 			new AssetDefine("PlayMakerEditor.dll", "", true, null, "ICE_PLAYMAKER" ),
 			new AssetDefine("UniStormWeatherSystem_C.cs", "", true, null, "ICE_UNISTORM" ),
 			new AssetDefine("Health.cs", "namespace Opsive.ThirdPersonController", true, null, "ICE_OPSIVE_TPC" ),

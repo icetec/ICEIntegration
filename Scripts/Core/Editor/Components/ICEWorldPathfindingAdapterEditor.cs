@@ -32,6 +32,11 @@ using ICE.Creatures.EnumTypes;
 #if ICE_ASTAR
 using Pathfinding;
 using Pathfinding.RVO;
+#elif ICE_APEX
+using Apex;
+using Apex.Steering;
+using Apex.Steering.Components;
+using Apex.PathFinding;
 #endif
 
 namespace ICE.Integration.Adapter
@@ -61,7 +66,53 @@ namespace ICE.Integration.Adapter
 
 		public void DrawAdapterContent( ICEWorldPathfindingAdapter _adapter )
 		{
-#if ICE_ASTAR && ICE_CC
+#if ICE_APEX && ICE_CC
+
+			EditorGUILayout.Separator();
+
+			SteerableUnitComponent m_SteerableUnitComponent = _adapter.GetComponent<SteerableUnitComponent>(); 
+			SteerForPathComponent m_SteerForPathComponent = _adapter.GetComponent<SteerForPathComponent>(); 
+			SteerToAlignWithVelocity m_SteerToAlignWithVelocity = _adapter.GetComponent<SteerToAlignWithVelocity>(); 
+			HumanoidSpeedComponent m_HumanoidSpeedComponent = _adapter.GetComponent<HumanoidSpeedComponent>(); 
+
+			PathOptionsComponent m_PathOptionsComponent = _adapter.GetComponent<PathOptionsComponent>(); 
+
+			EditorGUI.BeginDisabledGroup( m_SteerableUnitComponent != null );
+			GUI.backgroundColor = ( m_SteerableUnitComponent == null ? Color.yellow : Color.green );			
+			if( ICEEditorLayout.Button( "Steerable Unit", "", ICEEditorStyle.ButtonExtraLarge ) )
+				m_SteerableUnitComponent = _adapter.gameObject.AddComponent<SteerableUnitComponent>();
+			GUI.backgroundColor = ICEEditorLayout.DefaultBackgroundColor;
+			EditorGUI.EndDisabledGroup();
+
+			EditorGUI.BeginDisabledGroup( m_SteerForPathComponent != null );
+			GUI.backgroundColor = ( m_SteerForPathComponent == null ? Color.yellow : Color.green );			
+			if( ICEEditorLayout.Button( "Steer For Path", "", ICEEditorStyle.ButtonExtraLarge ) )
+				m_SteerForPathComponent = _adapter.gameObject.AddComponent<SteerForPathComponent>();
+			GUI.backgroundColor = ICEEditorLayout.DefaultBackgroundColor;
+			EditorGUI.EndDisabledGroup();
+
+			EditorGUI.BeginDisabledGroup( m_SteerToAlignWithVelocity != null );
+			GUI.backgroundColor = ( m_SteerToAlignWithVelocity == null ? Color.yellow : Color.green );			
+			if( ICEEditorLayout.Button( "Steer To Align With Velocity", "", ICEEditorStyle.ButtonExtraLarge ) )
+				m_SteerToAlignWithVelocity = _adapter.gameObject.AddComponent<SteerToAlignWithVelocity>();
+			GUI.backgroundColor = ICEEditorLayout.DefaultBackgroundColor;
+			EditorGUI.EndDisabledGroup();
+
+			EditorGUI.BeginDisabledGroup( m_HumanoidSpeedComponent != null );
+			GUI.backgroundColor = ( m_HumanoidSpeedComponent == null ? Color.yellow : Color.green );			
+			if( ICEEditorLayout.Button( "Humanoid Speed Component", "", ICEEditorStyle.ButtonExtraLarge ) )
+				m_HumanoidSpeedComponent = _adapter.gameObject.AddComponent<HumanoidSpeedComponent>();
+			GUI.backgroundColor = ICEEditorLayout.DefaultBackgroundColor;
+			EditorGUI.EndDisabledGroup();
+
+			EditorGUI.BeginDisabledGroup( m_PathOptionsComponent != null );
+			GUI.backgroundColor = ( m_PathOptionsComponent == null ? Color.yellow : Color.green );			
+			if( ICEEditorLayout.Button( "Path Options Component", "", ICEEditorStyle.ButtonExtraLarge ) )
+				m_PathOptionsComponent = _adapter.gameObject.AddComponent<PathOptionsComponent>();
+			GUI.backgroundColor = ICEEditorLayout.DefaultBackgroundColor;
+			EditorGUI.EndDisabledGroup();
+
+#elif ICE_ASTAR && ICE_CC
 
 			EditorGUILayout.Separator();	
 
@@ -181,8 +232,8 @@ namespace ICE.Integration.Adapter
 
 #else
 
-			string _info = "This Adapter requires the A* Pathfinding Project and ICECreatureControl packages. " +
-				"If both assets are correct installed please add 'ASTAR' and 'ICECC' to your custom defines.";
+			string _info = "This Adapter requires the A* Pathfinding Project or APEX Path and ICECreatureControl packages. " +
+				"If all required assets are correct installed please add  'ICE_CC' and 'ICE_ASTAR' or 'ICE_APEX' to the Scripting Define Symbols.";
 			EditorGUILayout.HelpBox( _info, MessageType.Info );
 #endif
 
