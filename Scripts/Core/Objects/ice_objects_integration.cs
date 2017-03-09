@@ -62,6 +62,8 @@ namespace ICE.Integration.Objects
 				_handled = TryUnitZDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#elif ICE_EASY_WEAPONS
 				_handled = TryEasyWeaponsDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
+			#elif ICE_ULTIMATE_SURVIVAL
+				_handled = TryUltimateSurvivalDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#endif
 		
 			return _handled;
@@ -312,6 +314,42 @@ namespace ICE.Integration.Objects
 			return _handled;
 		}
 
+		/// <summary>
+		/// Tries to handle Ultimate Survival damage.
+		/// </summary>
+		/// <returns><c>true</c>, if ultimate survival damage was tryed, <c>false</c> otherwise.</returns>
+		/// <param name="_sender">Sender.</param>
+		/// <param name="_target">Target.</param>
+		/// <param name="_impact_type">Impact type.</param>
+		/// <param name="_damage">Damage.</param>
+		/// <param name="_damage_method">Damage method.</param>
+		/// <param name="_damage_point">Damage point.</param>
+		/// <param name="_force_type">Force type.</param>
+		/// <param name="_force">Force.</param>
+		private static bool TryUltimateSurvivalDamage( GameObject _sender, GameObject _target, DamageTransferType _impact_type, float _damage, string _damage_method, Vector3 _damage_point, DamageForceType _force_type, float _force )
+		{
+			if( _target == null || _sender == null || _target == _sender )
+				return false;
+
+			bool _handled = false;
+
+			#if ICE_ULTIMATE_SURVIVAL
+
+			UltimateSurvival.EntityEventHandler _attacker = _sender.GetComponent<UltimateSurvival.EntityEventHandler>();
+			UltimateSurvival.EntityEventHandler _victim = _target.GetComponent<UltimateSurvival.EntityEventHandler>();
+			UltimateSurvival.IDamageable _damageable = _sender.GetComponent<UltimateSurvival.IDamageable>();
+
+			UltimateSurvival.HealthEventData _health_event_data = new UltimateSurvival.HealthEventData( - _damage, _attacker, _damage_point, _sender.transform.position - _target.transform.position, _force );
+
+			if( _damageable != null)
+				_damageable.ReceiveDamage( _health_event_data );
+			else if( _victim != null )
+				_victim.ChangeHealth.Try( _health_event_data );
+
+			#endif
+
+			return _handled;
+		}
 
 	}
 }

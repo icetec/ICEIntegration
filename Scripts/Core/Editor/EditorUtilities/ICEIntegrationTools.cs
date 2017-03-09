@@ -71,6 +71,8 @@ namespace ICE.Integration.Menus
 			new AssetDefine("CharacterDamage.cs", "", true, null, "ICE_RFPSP" ),
 			new AssetDefine("DamageManager.cs", "UnitZ", true, null, "ICE_UNITZ" ),
 			new AssetDefine("Health.cs", "Author: MutantGopher", true, null, "ICE_EASY_WEAPONS" ),
+			new AssetDefine("GenericVitals.cs", "namespace UltimateSurvival", true, null, "ICE_ULTIMATE_SURVIVAL" ),
+
 		};
 
 		private struct AssetDefine

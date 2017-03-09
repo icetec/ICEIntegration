@@ -26,6 +26,8 @@ using ICE.Integration.Objects;
 
 #if ICE_OPSIVE_TPC 
 using Opsive.ThirdPersonController;
+#elif ICE_ULTIMATE_SURVIVAL
+using UltimateSurvival;
 #endif
 
 namespace ICE.Integration.Adapter
@@ -230,7 +232,48 @@ namespace ICE.Integration.Adapter
 			Entity.ApplyDamage( _damage * (-1) );
 		}
 	}
+#elif ICE_ULTIMATE_SURVIVAL
+	[RequireComponent(typeof(ICEWorldEntity))]
+	public class ICEWorldDamageAdapter : GenericVitals {
 
+		protected ICEWorldEntity m_AttachedEntity = null;
+		public ICEWorldEntity AttachedEntity{
+			get{ return m_AttachedEntity = ( m_AttachedEntity == null ? ICEWorldEntity.GetWorldEntity( this.gameObject ) : m_AttachedEntity ); }
+		}
+
+		// IMPORTANT: this overrides the EntityDamageConverter.DoHandleDamage method with the 
+		// customized damage method and allows to use the original damage handler of the asset.
+		private DamageConverter _dc = new DamageConverter();
+
+		private void Awake()
+		{
+			if( Entity == null )
+			{
+				Debug.Log( "UltimateSurvival.EntityEventHandler is missing!" );
+				return;
+			}
+				
+			
+			Entity.ChangeHealth.SetTryer( Try_ChangeHealth );
+			//Entity.Land.AddListener(On_Landed);
+			//Entity.Health.AddChangeListener(OnChanged_Health);
+		}
+
+
+		protected override bool Try_ChangeHealth( HealthEventData _health_event_data )
+		{
+			if( _health_event_data == null || Entity == null || AttachedEntity == null )
+				return false;
+
+			Transform _attacker = null;
+			if( _health_event_data.Damager != null )
+				_attacker = _health_event_data.Damager.transform;
+
+			AttachedEntity.AddDamage( _health_event_data.Delta * (-1) , _health_event_data.HitDirection , _health_event_data.HitPoint , null , 0 );
+
+			return true;
+		}
+	}
 #else
 	public class ICEWorldDamageAdapter : ICEWorldBehaviour{}
 #endif

@@ -41,8 +41,20 @@ namespace ICE.Integration.Adapter
 			#if ICE_OPSIVE_TPC
 			#elif ICE_UFPS
 			_adapter.UseUFPSDamageHandling = ICEEditorLayout.Toggle( "Use UFPS Damage Handling", "", _adapter.UseUFPSDamageHandling );
-			#elif RFPS
+			#elif ICE_RFPS
 			#elif ICE_UNITZ
+			#elif ICE_EASY_WEAPONS
+			#elif ICE_ULTIMATE_SURVIVAL
+
+			UltimateSurvival.EntityEventHandler _entity_event_handler = _adapter.gameObject.GetComponentInParent< UltimateSurvival.EntityEventHandler >();
+
+			EditorGUI.BeginDisabledGroup( _entity_event_handler != null );
+			GUI.backgroundColor = ( _entity_event_handler == null ? Color.yellow : Color.green );			
+			if( ICEEditorLayout.Button( "Entity Event Handler", "", ICEEditorStyle.ButtonExtraLarge ) )
+				_entity_event_handler = _adapter.gameObject.AddComponent<UltimateSurvival.EntityEventHandler>();
+			GUI.backgroundColor = ICEEditorLayout.DefaultBackgroundColor;
+			EditorGUI.EndDisabledGroup();
+
 			#else
 			#endif
 		}
