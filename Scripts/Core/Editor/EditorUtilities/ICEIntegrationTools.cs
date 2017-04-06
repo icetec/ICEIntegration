@@ -1,7 +1,7 @@
 ﻿// ##############################################################################
 //
 // ice_editor_defines.cs
-// Version 1.3.7
+// Version 1.4.0
 //
 // Copyrights © Pit Vetterick, ICE Technologies Consulting LTD. All Rights Reserved.
 // http://www.icecreaturecontrol.com
@@ -72,7 +72,8 @@ namespace ICE.Integration.Menus
 			new AssetDefine("DamageManager.cs", "UnitZ", true, null, "ICE_UNITZ" ),
 			new AssetDefine("Health.cs", "Author: MutantGopher", true, null, "ICE_EASY_WEAPONS" ),
 			new AssetDefine("GenericVitals.cs", "namespace UltimateSurvival", true, null, "ICE_ULTIMATE_SURVIVAL" ),
-
+			new AssetDefine("Entity.cs", "", true, null, "ICE_UMMORPG" ),
+			new AssetDefine("vCharacter.cs", "namespace Invector", true, null, "ICE_INVECTOR_TPC" )
 		};
 
 		private struct AssetDefine

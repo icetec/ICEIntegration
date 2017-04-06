@@ -1,7 +1,7 @@
 ﻿// ##############################################################################
 //
 // ICE.World.Objects.ice_objects_integration.cs | DamageConverter : EntityDamageConverter
-// Version 1.3.7
+// Version 1.4.0
 //
 // Copyrights © Pit Vetterick, ICE Technologies Consulting LTD. All Rights Reserved.
 // http://www.icecreaturecontrol.com
@@ -37,6 +37,10 @@ using ICE.World.Objects;
 using ICE.World.Utilities;
 using ICE.World.EnumTypes;
 
+#if ICE_INVECTOR_TPC
+using Invector.EventSystems;
+#endif
+
 namespace ICE.Integration.Objects
 {
 	public class DamageConverter : EntityDamageConverter{
@@ -58,6 +62,8 @@ namespace ICE.Integration.Objects
 				_handled = TryRFPSPDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#elif ICE_OPSIVE_TPC
 				_handled = TryTPCDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
+			#elif ICE_INVECTOR_TPC
+				_handled = TryInvectorTPCDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#elif ICE_UNITZ
 				_handled = TryUnitZDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#elif ICE_EASY_WEAPONS
@@ -228,6 +234,45 @@ namespace ICE.Integration.Objects
 				_health.Damage( _damage, _position, ( _force_type != DamageForceType.None ? _direction.normalized * _force : Vector3.zero ) , _sender, _target );
 			_handled = true;
 			}
+
+			#endif
+
+			return _handled;
+		}
+
+		/// <summary>
+		/// Tries to handle Invector TPC damage.
+		/// </summary>
+		/// <returns><c>true</c>, if invector TPC damage was tryed, <c>false</c> otherwise.</returns>
+		/// <param name="_sender">Sender.</param>
+		/// <param name="_target">Target.</param>
+		/// <param name="_impact_type">Impact type.</param>
+		/// <param name="_damage">Damage.</param>
+		/// <param name="_damage_method">Damage method.</param>
+		/// <param name="_damage_point">Damage point.</param>
+		/// <param name="_force_type">Force type.</param>
+		/// <param name="_force">Force.</param>
+		private static bool TryInvectorTPCDamage( GameObject _sender, GameObject _target, DamageTransferType _impact_type, float _damage, string _damage_method, Vector3 _damage_point, DamageForceType _force_type, float _force )
+		{
+			if( _target == null || _sender == null || _target == _sender )
+				return false;
+
+			bool _handled = false;
+
+			#if ICE_INVECTOR_TPC
+
+			Damage _damage_obj = new Damage( (int)Mathf.RoundToInt( _damage ) );
+
+			_damage_obj.sender = _sender.transform;
+			_damage_obj.receiver = _target.transform;
+			_damage_obj.hitPosition = _damage_point;
+
+			if( _target.IsAMeleeFighter() )
+				_target.GetMeleeFighter().OnReceiveAttack( _damage_obj, _target.GetMeleeFighter() );
+			else if ( _target.CanReceiveDamage())
+				_target.ApplyDamage( _damage_obj );
+
+			_handled = true;
 
 			#endif
 

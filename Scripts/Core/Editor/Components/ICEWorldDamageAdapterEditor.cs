@@ -1,7 +1,7 @@
 ﻿// ##############################################################################
 //
 // ICEWorldDamageAdapterEditor.cs
-// Version 1.3.7
+// Version 1.4.0
 //
 // © Pit Vetterick, ICE Technologies Consulting LTD. All Rights Reserved.
 // http://www.ice-technologies.com
@@ -39,6 +39,7 @@ namespace ICE.Integration.Adapter
 		public void DrawAdapterContent( ICEWorldDamageAdapter _adapter )
 		{
 			#if ICE_OPSIVE_TPC
+			#elif ICE_OPSIVE_TPC
 			#elif ICE_UFPS
 			_adapter.UseUFPSDamageHandling = ICEEditorLayout.Toggle( "Use UFPS Damage Handling", "", _adapter.UseUFPSDamageHandling );
 			#elif ICE_RFPS
@@ -54,7 +55,7 @@ namespace ICE.Integration.Adapter
 				_entity_event_handler = _adapter.gameObject.AddComponent<UltimateSurvival.EntityEventHandler>();
 			GUI.backgroundColor = ICEEditorLayout.DefaultBackgroundColor;
 			EditorGUI.EndDisabledGroup();
-
+			#elif ICE_UMMORPG
 			#else
 			#endif
 		}

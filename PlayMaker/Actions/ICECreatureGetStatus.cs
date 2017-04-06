@@ -1,7 +1,7 @@
 ﻿// ##############################################################################
 //
 // ICECreatureGetStatus.cs
-// Version 1.3.7
+// Version 1.4.0
 //
 // © Pit Vetterick, ICE Technologies Consulting LTD. All Rights Reserved.
 // http://www.icecreaturecontrol.com
