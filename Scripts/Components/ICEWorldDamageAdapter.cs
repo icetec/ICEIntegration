@@ -294,6 +294,53 @@ namespace ICE.Integration.Adapter
 		}
 	}
 #elif ICE_ULTIMATE_SURVIVAL
+
+	[RequireComponent(typeof(ICEWorldEntity))]
+	public class ICEWorldDamageAdapter : EntityBehaviour, IDamageable 
+	{
+		protected ICEWorldEntity m_AttachedEntity = null;
+		public ICEWorldEntity AttachedEntity{
+			get{ return m_AttachedEntity = ( m_AttachedEntity == null ? ICEWorldEntity.GetWorldEntity( this.gameObject ) : m_AttachedEntity ); }
+		}
+
+		private EntityEventHandler m_ParentEntity;
+
+		// IMPORTANT: this overrides the EntityDamageConverter.DoHandleDamage method with the 
+		// customized damage method and allows to use the original damage handler of the asset.
+		private DamageConverter _dc = new DamageConverter();
+
+
+		private void Awake()
+		{
+			/*
+			m_ParentEntity = GetComponentInParent<EntityEventHandler>();
+			if(!m_ParentEntity)
+			{
+				Debug.LogErrorFormat(this, "[This HitBox is not under an entity, like a player, animal, etc, it has no purpose.", name);
+				enabled = false;
+				return;
+			}*/
+		}
+
+		private void Start() 
+		{
+			//Entity.ChangeHealth.SetTryer( TryChangeHealth ); 
+		}
+
+		public void ReceiveDamage( HealthEventData _damage_data )
+		{
+			if( ! enabled )
+				return;
+			
+			Transform _attacker = null;
+			if( _damage_data.Damager != null )
+				_attacker = _damage_data.Damager.transform;
+
+			AttachedEntity.AddDamage( _damage_data.Delta * (-1) , _damage_data.HitDirection , _damage_data.HitPoint , _attacker , _damage_data.HitImpulse );
+
+		}
+	}
+	/*
 	[RequireComponent(typeof(ICEWorldEntity))]
 	public class ICEWorldDamageAdapter : GenericVitals {
 
@@ -306,6 +353,7 @@ namespace ICE.Integration.Adapter
 		// customized damage method and allows to use the original damage handler of the asset.
 		private DamageConverter _dc = new DamageConverter();
 
+	
 		private void Awake()
 		{
 			if( Entity == null )
@@ -314,10 +362,25 @@ namespace ICE.Integration.Adapter
 				return;
 			}
 				
-			
 			Entity.ChangeHealth.SetTryer( Try_ChangeHealth );
-			//Entity.Land.AddListener(On_Landed);
-			//Entity.Health.AddChangeListener(OnChanged_Health);
+			Entity.Land.AddListener(On_Landed);
+			Entity.Health.AddChangeListener(OnChanged_Health);
+		}
+
+		private void OnChanged_Health()
+		{
+			Debug.Log( "OnChanged_Health" );
+
+			float delta = Entity.Health.Get() - Entity.Health.GetLastValue();
+			if(delta < 0f)
+			{
+				
+			}
+		}
+
+		private void On_Landed(float landSpeed)
+		{
+			Debug.Log( "On_Landed" );
 		}
 
 
@@ -334,7 +397,7 @@ namespace ICE.Integration.Adapter
 
 			return true;
 		}
-	}
+	}*/
 #elif ICE_UMMORPG
 
 	using UnityEngine.Networking;
