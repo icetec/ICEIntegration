@@ -42,7 +42,21 @@ namespace ICE.Integration.Adapter
 
 		public void DrawAdapterContent( ICEWorldEnvironmentAdapter m_adapter )
 		{
-			#if ICE_UNISTORM
+			#if ICE_WEATHER_MAKER
+				ICEEditorLayout.BeginHorizontal();
+				m_adapter.UpdateInterval = ICEEditorLayout.DefaultSlider( "Update Interval", "", m_adapter.UpdateInterval, 0.05f, 0, 360, 10 );	
+
+				if( ICEEditorLayout.Button( "UPDATE", "Update Weather", ICEEditorStyle.ButtonMiddle ) )
+					m_adapter.UpdateWeather();
+				ICEEditorLayout.EndHorizontal();
+			#elif ICE_TENKOKU
+				ICEEditorLayout.BeginHorizontal();
+				m_adapter.UpdateInterval = ICEEditorLayout.DefaultSlider( "Update Interval", "", m_adapter.UpdateInterval, 0.05f, 0, 360, 10 );	
+
+				if( ICEEditorLayout.Button( "UPDATE", "Update Weather", ICEEditorStyle.ButtonMiddle ) )
+					m_adapter.UpdateWeather();
+				ICEEditorLayout.EndHorizontal();
+			#elif ICE_UNISTORM
 				ICEEditorLayout.BeginHorizontal();
 						m_adapter.UpdateInterval = ICEEditorLayout.DefaultSlider( "Update Interval", "", m_adapter.UpdateInterval, 0.05f, 0, 360, 10 );	
 
