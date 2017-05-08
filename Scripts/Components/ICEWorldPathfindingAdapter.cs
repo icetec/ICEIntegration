@@ -34,13 +34,16 @@ using Pathfinding;
 using Pathfinding.RVO;
 #elif ICE_APEX
 using Apex;
+using Apex.Services;
 using Apex.Steering;
+using Apex.Messages;
 #endif
 
 namespace ICE.Integration.Adapter
 {
 #if ICE_APEX && ICE_CC
-	public class ICEWorldPathfindingAdapter : ICEWorldBehaviour {
+	public class ICEWorldPathfindingAdapter : ExtendedMonoBehaviour, IHandleMessage<UnitNavigationEventMessage>
+	{
 
 		private ICECreatureControl m_Controller = null;
 		protected ICECreatureControl AttachedCreatureController{
@@ -57,13 +60,15 @@ namespace ICE.Integration.Adapter
 			get{ return m_Rigidbody = ( m_Rigidbody == null ? GetComponent<Rigidbody>() : m_Rigidbody ); }
 		}
 
-		private IMovable m_Unit = null;
-		protected IMovable m_AttachedUnit{
-			get{ return m_Unit = ( m_Unit == null ? this.As<IMovable>() : m_Unit ); }
+		private IMovable m_Mover = null;
+		protected IMovable m_AttachedMover{
+			get{ return m_Mover = ( m_Mover == null ? this.As<IMovable>() : m_Mover ); }
 		}
 
-		private Vector3 m_CurrentMovePosition = Vector3.zero;
+		private Vector3 m_DesiredMovePosition = Vector3.zero;
 
+
+		/*
 		void OnMoveComplete( GameObject _sender, TargetObject _target  )
 		{
 
@@ -76,21 +81,35 @@ namespace ICE.Integration.Adapter
 
 		void OnTargetMovePositionReached( GameObject _sender, TargetObject _target )
 		{
-		}
+		}*/
 
 		void OnCustomMove( GameObject _sender, ref Vector3 _new_position, ref Quaternion _new_rotation )
 		{
-			if( m_AttachedUnit == null )
+			if( m_AttachedMover == null )
 				return;
-			
-			if( _new_position != m_CurrentMovePosition )
+
+			if( m_AttachedMover.finalDestination == null || m_AttachedMover.finalDestination != _new_position )
 			{
-				m_CurrentMovePosition = _new_position;
-				m_AttachedUnit.MoveTo( _new_position, false );	
+				m_DesiredMovePosition = _new_position;
+				m_AttachedMover.MoveTo( m_DesiredMovePosition, false );
 			}
-			else
-				m_CurrentMovePosition = _new_position;
 		}
+
+		void IHandleMessage<UnitNavigationEventMessage>.Handle( UnitNavigationEventMessage _message )
+		{
+			if( _message.entity != this.gameObject )
+				return;
+	
+			switch( _message.eventCode )
+			{
+				case UnitNavigationEventMessage.Event.StoppedUnitOutsideGrid:
+				case UnitNavigationEventMessage.Event.StoppedNoRouteExists:
+				case UnitNavigationEventMessage.Event.StoppedDestinationBlocked:
+					AttachedCreatureController.Creature.ActiveTarget.UpdateTargetMovePositionOffset( true );
+					break;
+			}
+		}
+
 
 		/// <summary>
 		/// Raises the enable event and starts RepeatTrySearchPath.
@@ -98,16 +117,27 @@ namespace ICE.Integration.Adapter
 		/// <description>
 		/// Starts RepeatTrySearchPath.
 		/// </description>
-		protected virtual void OnEnable () {
+		protected override void OnEnable () {
+
+			base.OnEnable();
 
 			if( AttachedCreatureController != null )
 			{
-				AttachedCreatureController.Creature.Move.OnTargetMovePositionReached += OnTargetMovePositionReached;
-				AttachedCreatureController.Creature.Move.OnMoveComplete += OnMoveComplete;
-				AttachedCreatureController.Creature.Move.OnUpdateMovePosition += OnMoveUpdatePosition;
+				//AttachedCreatureController.Creature.Move.OnTargetMovePositionReached += OnTargetMovePositionReached;
+				//AttachedCreatureController.Creature.Move.OnMoveComplete += OnMoveComplete;
+				//AttachedCreatureController.Creature.Move.OnUpdateMovePosition += OnMoveUpdatePosition;
 				AttachedCreatureController.Creature.Move.OnCustomMove += OnCustomMove;
 			}
 
+
+		}
+
+		/// <summary>
+		/// Called on Start and OnEnable, but only one of the two, i.e. at startup it is only called once.
+		/// </summary>
+		protected override void OnStartAndEnable()
+		{
+			GameServices.messageBus.Subscribe(this);
 		}
 
 		/// <summary>
@@ -117,11 +147,13 @@ namespace ICE.Integration.Adapter
 		{		
 			if( AttachedCreatureController != null )
 			{
-				AttachedCreatureController.Creature.Move.OnTargetMovePositionReached -= OnTargetMovePositionReached;
-				AttachedCreatureController.Creature.Move.OnMoveComplete -= OnMoveComplete;
-				AttachedCreatureController.Creature.Move.OnUpdateMovePosition -= OnMoveUpdatePosition;
+				//AttachedCreatureController.Creature.Move.OnTargetMovePositionReached -= OnTargetMovePositionReached;
+				//AttachedCreatureController.Creature.Move.OnMoveComplete -= OnMoveComplete;
+				//AttachedCreatureController.Creature.Move.OnUpdateMovePosition -= OnMoveUpdatePosition;
 				AttachedCreatureController.Creature.Move.OnCustomMove -= OnCustomMove;
 			}
+
+			GameServices.messageBus.Unsubscribe(this);
 		}
 	}
 #elif ICE_ASTAR && ICE_CC
