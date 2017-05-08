@@ -33,25 +33,20 @@ namespace ICE.Integration.Menus
 	public class ICEIntegrationEnvironmentMenu : MonoBehaviour {
 
 
-		// A* PATHFINDING ADAPTER
-		[MenuItem ("ICE/ICE Integration/Environment/Add Environment Adapter", false, 8022 )]
-		static void AddAstarAdapter(){
+		[MenuItem ("ICE/ICE Integration/Environment/Create Environment Adapter", false, 8022 )]
+		static void AddEnvironmentAdapter(){
 
-			ICE.Creatures.ICECreatureControl[] _creatures = GameObject.FindObjectsOfType<ICE.Creatures.ICECreatureControl>();
-			if( _creatures != null )
+			if( ICEWorldEnvironmentAdapter.Instance == null )
 			{
-				foreach( ICE.Creatures.ICECreatureControl _creature in _creatures )
-				{
-					if( _creature.GetComponent<ICEWorldPathfindingAdapter>() == null )
-						_creature.gameObject.AddComponent<ICEWorldPathfindingAdapter>();						
-				}
+				GameObject _object = new GameObject();
+				_object.name = "Environment";
+				_object.AddComponent<ICEWorldEnvironmentAdapter>();
 			}
-
 		}
 
-		[MenuItem ( "ICE/ICE Integration/Environment/Add Environment Adapter", true)]
-		static bool ValidateAddAstarAdapter(){
-			#if ICE_UNISTORM
+		[MenuItem ( "ICE/ICE Integration/Environment/Create Environment Adapter", true)]
+		static bool ValidateEnvironmentAdapter(){
+			#if ICE_UNISTORM || ICE_TENKOKU || ICE_WEATHER_MAKER
 			return true;
 			#else
 			return false;
@@ -59,23 +54,20 @@ namespace ICE.Integration.Menus
 		}
 
 		[MenuItem ("ICE/ICE Integration/Environment/Remove Environment Adapter", false, 8022 )]
-		static void RemoveUniStormAdapter(){
-
-			ICE.Creatures.ICECreatureControl[] _creatures = GameObject.FindObjectsOfType<ICE.Creatures.ICECreatureControl>();
-			if( _creatures != null )
+		static void RemoveEnvironmentAdapter(){
+			
+			if( ICEWorldEnvironmentAdapter.Instance != null )
 			{
-				foreach( ICE.Creatures.ICECreatureControl _creature in _creatures )
-				{
-					if( _creature.GetComponent<ICEWorldPathfindingAdapter>() != null )
-						GameObject.DestroyImmediate( _creature.GetComponent<ICEWorldPathfindingAdapter>() );						
-				}
+				if( ICEWorldEnvironmentAdapter.Instance.gameObject.name == "Environment" )
+					DestroyImmediate( ICEWorldEnvironmentAdapter.Instance.gameObject );
+				else
+					DestroyImmediate( ICEWorldEnvironmentAdapter.Instance );
 			}
-
 		}
 
 		[MenuItem ( "ICE/ICE Integration/Environment/Remove Environment Adapter", true)]
-		static bool ValidateRemoveUniStormAdapter(){
-			#if ICE_UNISTORM
+		static bool ValidateRemoveEnvironmentAdapter(){
+			#if ICE_UNISTORM || ICE_TENKOKU || ICE_WEATHER_MAKER
 			return true;
 			#else
 			return false;
