@@ -22,13 +22,6 @@ using System.Collections.Generic;
 
 using ICE;
 using ICE.World;
-/*
-#if ICE_CC
-using ICE.Creatures;
-using ICE.Creatures.Objects;
-using ICE.Creatures.EnumTypes;
-#endif
-*/
 
 #if ICE_PUN
 
@@ -36,7 +29,7 @@ using ICE.Creatures.EnumTypes;
 
 namespace ICE.Integration.Adapter
 {
-#if ICE_PUN && ICE_CC
+#if ICE_PUN
 	public class ICEWorldNetworkSpawner : Photon.PunBehaviour
 #else
 	public class ICEWorldNetworkSpawner : ICEWorldNetworkBehaviour 
@@ -48,11 +41,19 @@ namespace ICE.Integration.Adapter
 		}
 
 		public bool UseDeactivateSceneCreatures = true;
+		public bool UseDeactivateScenePlayer = true;
+
+		#if ICE_UFPS_MP
 		public bool WaitForUFPSMP = true;
+		#endif
 
 		public bool WaitForExternalSpawnEvent{
 			get{
+				#if ICE_UFPS_MP
 				return WaitForUFPSMP;
+				#else
+				return false;
+				#endif
 			}
 		}
 
@@ -169,7 +170,7 @@ namespace ICE.Integration.Adapter
 		private GameObject NetworkInstantiate( string _name, Vector3 _position, Quaternion _rotation )
 		{
 			#if ICE_PUN
-			return (GameObject)PhotonNetwork.Instantiate( _reference.name, _position, _rotation, 0 );
+			return (GameObject)PhotonNetwork.Instantiate( _name, _position, _rotation, 0 );
 			#else
 			return null;
 			#endif
@@ -178,7 +179,7 @@ namespace ICE.Integration.Adapter
 		private GameObject NetworkInstantiateSceneObject( string _name, Vector3 _position, Quaternion _rotation )
 		{
 			#if ICE_PUN
-			return (GameObject)PhotonNetwork.InstantiateSceneObject( _reference.name, _position, _rotation, 0, null ); 
+			return (GameObject)PhotonNetwork.InstantiateSceneObject( _name, _position, _rotation, 0, null ); 
 			#else
 			return null;
 			#endif
@@ -192,9 +193,9 @@ namespace ICE.Integration.Adapter
 				PhotonNetwork.Destroy( _object );
 				return true;
 			}
-			#else
-			return false;
 			#endif
+
+			return false;
 		}
 
 
@@ -268,6 +269,13 @@ namespace ICE.Integration.Adapter
 			{
 				ICE.Creatures.ICECreatureControl[] _creatures = FindObjectsOfType<ICE.Creatures.ICECreatureControl>();
 				foreach( ICE.Creatures.ICECreatureControl _creature in _creatures )
+					_creature.gameObject.SetActive( false );
+			}
+
+			if( UseDeactivateScenePlayer )
+			{
+				ICE.Creatures.ICECreaturePlayer[] _player = FindObjectsOfType<ICE.Creatures.ICECreaturePlayer>();
+				foreach( ICE.Creatures.ICECreaturePlayer _creature in _player )
 					_creature.gameObject.SetActive( false );
 			}
 	#endif

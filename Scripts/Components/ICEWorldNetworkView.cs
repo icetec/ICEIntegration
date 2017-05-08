@@ -29,10 +29,6 @@ using ICE.Creatures.Objects;
 using ICE.Creatures.EnumTypes;
 #endif
 
-#if ICE_PUN
-
-#endif
-
 namespace ICE.Integration.Adapter
 {
 #if ICE_PUN && ICE_CC

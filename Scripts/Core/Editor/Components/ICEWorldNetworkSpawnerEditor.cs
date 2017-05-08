@@ -64,6 +64,7 @@ namespace ICE.Integration.Adapter
 
 #if ICE_CC
 			_adapter.UseDeactivateSceneCreatures = ICEEditorLayout.Toggle( "Deactivate Scene Creatures", "Deactivates existing scene creatures at awake", _adapter.UseDeactivateSceneCreatures, "" );
+			_adapter.UseDeactivateScenePlayer = ICEEditorLayout.Toggle( "Deactivate Scene Player", "Deactivates existing scene player at awake", _adapter.UseDeactivateScenePlayer, "" );
 #endif
 
 #if ICE_UFPS_MP
