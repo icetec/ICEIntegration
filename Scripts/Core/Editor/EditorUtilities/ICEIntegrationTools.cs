@@ -45,21 +45,33 @@ namespace ICE.Integration.Menus
 		{
 			/*new AssetDefine("ICEWorldBehaviour.cs", "", true, null, "ICE" ),*/
 			new AssetDefine("ICECreatureControl.cs", "", true, null, "ICE_CC" ),
-			new AssetDefine("ICEEnvironment.cs", "", true, null, "ICE_ENV" ),
-			new AssetDefine("PhotonNetwork.cs", "", true, null, "ICE_PUN" ),
-			new AssetDefine("AstarPath.cs", "", true, null, "ICE_ASTAR" ),
-			new AssetDefine("ApexShared.dll", "", true, null, "ICE_APEX" ),
-			new AssetDefine("PlayMakerEditor.dll", "", true, null, "ICE_PLAYMAKER" ),
-			new AssetDefine("UniStormWeatherSystem_C.cs", "", true, null, "ICE_UNISTORM" ),
+
+			// DAMAGE HANDLING
 			new AssetDefine("Health.cs", "namespace Opsive.ThirdPersonController", true, null, "ICE_OPSIVE_TPC" ),
 			new AssetDefine("vp_DamageHandler.cs", "", true, null, "ICE_UFPS" ),
-			new AssetDefine("vp_MPMaster.cs", "", true, null, "ICE_UFPS_MP" ),
 			new AssetDefine("CharacterDamage.cs", "", true, null, "ICE_RFPSP" ),
 			new AssetDefine("DamageManager.cs", "UnitZ", true, null, "ICE_UNITZ" ),
 			new AssetDefine("Health.cs", "Author: MutantGopher", true, null, "ICE_EASY_WEAPONS" ),
 			new AssetDefine("GenericVitals.cs", "namespace UltimateSurvival", true, null, "ICE_ULTIMATE_SURVIVAL" ),
 			new AssetDefine("Entity.cs", "", true, null, "ICE_UMMORPG" ),
-			new AssetDefine("vCharacter.cs", "namespace Invector", true, null, "ICE_INVECTOR_TPC" )
+			new AssetDefine("vCharacter.cs", "namespace Invector", true, null, "ICE_INVECTOR_TPC" ),
+
+			// NETWORKING
+			new AssetDefine("PhotonNetwork.cs", "", true, null, "ICE_PUN" ),
+			new AssetDefine("vp_MPMaster.cs", "", true, null, "ICE_UFPS_MP" ),
+
+			// PATHFINDING
+			new AssetDefine("AstarPath.cs", "", true, null, "ICE_ASTAR" ),
+			new AssetDefine("ApexShared.dll", "", true, null, "ICE_APEX" ),
+
+			// ENVIRONMENT
+			new AssetDefine("ICEEnvironment.cs", "", true, null, "ICE_ENV" ),
+			new AssetDefine("UniStormWeatherSystem_C.cs", "", true, null, "ICE_UNISTORM" ),
+			new AssetDefine("TenkokuModule.cs", "", true, null, "ICE_TENKOKU" ),
+			new AssetDefine("WeatherMakerScript.cs", "", true, null, "ICE_WEATHER_MAKER" ),
+
+			// OTHER
+			new AssetDefine("PlayMakerEditor.dll", "", true, null, "ICE_PLAYMAKER" )
 		};
 
 		private struct AssetDefine
