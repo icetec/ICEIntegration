@@ -13,6 +13,7 @@
 // ##############################################################################
 
 using UnityEngine;
+using System;
 using System.Collections;
 
 using ICE;
@@ -21,9 +22,194 @@ using ICE.World.EnumTypes;
 using ICE.World.Utilities;
 using ICE.World.Objects;
 
+#if ICE_TENKOKU
+using Tenkoku.Core;
+#elif ICE_WEATHER_MAKER
+using DigitalRuby.WeatherMaker;
+#endif
+
 namespace ICE.Integration.Adapter
 {
-#if ICE_UNISTORM
+#if ICE_WEATHER_MAKER
+	public class ICEWorldEnvironmentAdapter : ICEWorldEnvironment 
+	{
+		private WeatherMakerScript m_WeatherSystem = null;
+		private WeatherMakerScript WeatherSystem{
+			get{
+				if( m_WeatherSystem == null )
+					m_WeatherSystem = (WeatherMakerScript) FindObjectOfType(typeof(WeatherMakerScript));
+
+				return m_WeatherSystem;
+			}
+		}
+
+		private float m_UpdateTimer = 0;
+		public float UpdateInterval = 10;
+
+		public override void Awake (){
+			UpdateWeather();
+		}
+
+
+		public override void Update ()
+		{
+
+			m_UpdateTimer += Time.deltaTime;
+			if( m_UpdateTimer < UpdateInterval )
+			return;
+
+			m_UpdateTimer = 0;
+
+			UpdateWeather();
+
+
+		}
+
+		public void UpdateWeather()
+		{
+			if( WeatherSystem == null )
+				Debug.LogWarning ("Sorry, WeatherMakerScript not exists!");
+
+			WeatherForecast = ConvertWeatherType();
+			//Temperature = WeatherSystem.temperature;
+
+			TimeSpan _time = TimeSpan.FromSeconds(WeatherSystem.TimeOfDay);
+			DateTime _date = new DateTime( _time.Ticks );
+
+			DateDay = _date.Day;
+			DateMonth = _date.Month;
+			DateYear = _date.Year;
+			TimeHour = _time.Hours;
+			TimeMinutes = _time.Minutes;
+			TimeSeconds = _time.Seconds;
+
+			if( WeatherSystem.WindScript != null )
+			{
+				WindSpeed = WeatherSystem.WindScript.WindIntensity;
+				WindDirection = Quaternion.Angle( Quaternion.identity, Quaternion.Euler( WeatherSystem.WindScript.WindDirection ) );
+			}
+
+
+			UpdateTemperatureScale( TemperatureScaleType.FAHRENHEIT );
+
+			Temperature = WeatherSystem.Temperature;
+			MinTemperature = -100;
+			MaxTemperature = 150;
+		}
+
+		private WeatherType ConvertWeatherType()
+		{
+			WeatherType _weather_type = WeatherType.UNDEFINED;
+
+			if( WeatherSystem.Precipitation != WeatherMakerPrecipitationType.None && WeatherSystem.PrecipitationIntensity > 0.75 )
+				_weather_type = WeatherType.HEAVY_RAIN;
+			else if( WeatherSystem.Precipitation != WeatherMakerPrecipitationType.None && WeatherSystem.PrecipitationIntensity > 0.25 )
+				_weather_type = WeatherType.RAIN;
+			else if( WeatherSystem.Clouds != WeatherMakerCloudType.Heavy )
+				_weather_type = WeatherType.MOSTLY_CLOUDY;
+			else if( WeatherSystem.Clouds != WeatherMakerCloudType.Medium )
+				_weather_type = WeatherType.CLOUDY;
+			else if( WeatherSystem.Clouds != WeatherMakerCloudType.Light )
+				_weather_type = WeatherType.PARTLY_CLOUDY;
+			else if( WeatherSystem.Clouds != WeatherMakerCloudType.Storm )
+				_weather_type = WeatherType.STORMY;
+			else if( WeatherSystem.WindScript != null && WeatherSystem.WindScript.WindIntensity > 0.25f )
+				_weather_type = WeatherType.WINDY;
+			else if( WeatherSystem.FogScript != null && WeatherSystem.FogScript.FogDensity > 0.25f  )
+				_weather_type = WeatherType.FOGGY;
+			else
+				_weather_type = WeatherType.CLEAR;
+
+			return _weather_type;
+		}
+	}
+
+#elif ICE_TENKOKU
+	public class ICEWorldEnvironmentAdapter : ICEWorldEnvironment 
+	{
+		
+		private TenkokuModule m_WeatherSystem = null;
+		private TenkokuModule WeatherSystem{
+			get{
+				if( m_WeatherSystem == null )
+					m_WeatherSystem = (TenkokuModule) FindObjectOfType(typeof(TenkokuModule));
+
+				return m_WeatherSystem;
+			}
+		}
+
+		private float m_UpdateTimer = 0;
+		public float UpdateInterval = 10;
+
+		public override void Awake (){
+			UpdateWeather();
+		}
+
+
+		public override void Update (){
+
+			m_UpdateTimer += Time.deltaTime;
+			if( m_UpdateTimer < UpdateInterval )
+				return;
+
+			m_UpdateTimer = 0;
+
+			UpdateWeather();
+
+
+		}
+
+		public void UpdateWeather()
+		{
+			if( WeatherSystem == null )
+				Debug.LogWarning ("Sorry, TenkokuModule not exists!");
+
+			WeatherForecast = ConvertWeatherType();
+			//Temperature = WeatherSystem.temperature;
+			DateDay = (int)WeatherSystem.currentDay;
+			DateMonth = (int)WeatherSystem.currentMonth;
+			DateYear = (int)WeatherSystem.currentYear;
+			TimeHour = WeatherSystem.currentHour;
+			TimeMinutes = WeatherSystem.currentMinute;
+			TimeSeconds = WeatherSystem.currentSecond;
+
+			WindSpeed = WeatherSystem.weather_WindAmt;
+			WindDirection = WeatherSystem.weather_WindDir;
+
+			UpdateTemperatureScale( TemperatureScaleType.FAHRENHEIT );
+
+			Temperature = WeatherSystem.weather_temperature;
+			MinTemperature = 0;
+			MaxTemperature = 120;
+		}
+
+		private WeatherType ConvertWeatherType()
+		{
+			WeatherType _weather_type = WeatherType.UNDEFINED;
+
+			if( WeatherSystem.weather_RainAmt > 0.5f || WeatherSystem.weather_SnowAmt > 0.5f )
+				_weather_type = WeatherType.HEAVY_RAIN;
+			else if( WeatherSystem.weather_RainAmt > 0.25f || WeatherSystem.weather_SnowAmt > 0.25f )
+				_weather_type = WeatherType.RAIN;
+			else if( WeatherSystem.weather_OvercastAmt > 0.5f )
+				_weather_type = WeatherType.MOSTLY_CLOUDY;
+			else if( WeatherSystem.weather_cloudCumulusAmt > 0.75f )
+				_weather_type = WeatherType.CLOUDY;
+			else if( WeatherSystem.weather_cloudCumulusAmt > 0.25f )
+				_weather_type = WeatherType.PARTLY_CLOUDY;
+			else if( WeatherSystem.weather_WindAmt > 0.50f )
+				_weather_type = WeatherType.STORMY;
+			else if( WeatherSystem.weather_WindAmt > 0.25f )
+				_weather_type = WeatherType.WINDY;
+			else if( WeatherSystem.weather_FogAmt > 0.25f )
+				_weather_type = WeatherType.FOGGY;
+			else
+				_weather_type = WeatherType.CLEAR;
+
+			return _weather_type;
+		}
+	}
+#elif ICE_UNISTORM
 	public class ICEWorldEnvironmentAdapter : ICEWorldEnvironment 
 	{
 		private UniStormWeatherSystem_C m_UniStormWeatherSystem = null;
