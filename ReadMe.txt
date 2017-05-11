@@ -13,6 +13,7 @@ Environment
 	UniStorm Weather System		=> ICE_UNISTORM
 	Tenkoku Weather System		=> ICE_TENKOKU
 	Weather Maker System		=> ICE_WEATHER_MAKER
+	Enviro Dynamic Sky			=> ICE_ENVIRO
 	
 Damage Systems
 	Opsive TPC					=> ICE_OPSIVE_TPC

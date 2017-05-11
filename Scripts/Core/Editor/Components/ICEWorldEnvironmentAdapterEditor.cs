@@ -63,6 +63,13 @@ namespace ICE.Integration.Adapter
 					if( ICEEditorLayout.Button( "UPDATE", "Update Weather", ICEEditorStyle.ButtonMiddle ) )
 						m_adapter.UpdateWeather();
 				ICEEditorLayout.EndHorizontal();
+			#elif ICE_ENVIRO
+				ICEEditorLayout.BeginHorizontal();
+					m_adapter.UpdateInterval = ICEEditorLayout.DefaultSlider( "Update Interval", "", m_adapter.UpdateInterval, 0.05f, 0, 360, 10 );	
+
+					if( ICEEditorLayout.Button( "UPDATE", "Update Weather", ICEEditorStyle.ButtonMiddle ) )
+						m_adapter.UpdateWeather();
+				ICEEditorLayout.EndHorizontal();
 			#else
 			#endif
 		}

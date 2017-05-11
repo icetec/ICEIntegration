@@ -69,6 +69,7 @@ namespace ICE.Integration.Menus
 			new AssetDefine("UniStormWeatherSystem_C.cs", "", true, null, "ICE_UNISTORM" ),
 			new AssetDefine("TenkokuModule.cs", "", true, null, "ICE_TENKOKU" ),
 			new AssetDefine("WeatherMakerScript.cs", "", true, null, "ICE_WEATHER_MAKER" ),
+			new AssetDefine("EnviroSky.cs", "", true, null, "ICE_ENVIRO" ),
 
 			// OTHER
 			new AssetDefine("PlayMakerEditor.dll", "", true, null, "ICE_PLAYMAKER" )

@@ -30,7 +30,96 @@ using DigitalRuby.WeatherMaker;
 
 namespace ICE.Integration.Adapter
 {
-#if ICE_WEATHER_MAKER
+#if ICE_ENVIRO
+	public class ICEWorldEnvironmentAdapter : ICEWorldEnvironment 
+	{
+		private EnviroSky m_WeatherSystem = null;
+		private EnviroSky WeatherSystem{
+		get{
+			if( m_WeatherSystem == null )
+					m_WeatherSystem = (EnviroSky) FindObjectOfType(typeof(EnviroSky));
+
+			return m_WeatherSystem;
+			}
+		}
+
+		private float m_UpdateTimer = 0;
+		public float UpdateInterval = 10;
+
+		public override void Awake (){
+			UpdateWeather();
+		}
+
+
+		public override void Update ()
+		{
+			m_UpdateTimer += Time.deltaTime;
+			if( m_UpdateTimer < UpdateInterval )
+				return;
+
+			m_UpdateTimer = 0;
+
+			UpdateWeather();
+
+		}
+
+		public void UpdateWeather()
+		{
+			if( WeatherSystem == null )
+				Debug.LogWarning ("Sorry, WeatherMakerScript not exists!");
+
+			WeatherForecast = ConvertWeatherType();
+			//Temperature = WeatherSystem.temperature;
+
+			DateDay = WeatherSystem.GameTime.Days;
+			//DateMonth = WeatherSystem.GameTime.
+			DateYear = WeatherSystem.GameTime.Years;
+			TimeHour = WeatherSystem.GameTime.Hours;
+			TimeMinutes = WeatherSystem.GameTime.Minutes;
+			TimeSeconds = WeatherSystem.GameTime.Seconds;
+
+			if( WeatherSystem.Weather.windZone != null )
+			{
+				WindSpeed = WeatherSystem.Weather.windZone.windMain;
+				WindDirection = Quaternion.Angle( Quaternion.identity, WeatherSystem.Weather.windZone.transform.rotation );
+			}
+
+			/*
+			UpdateTemperatureScale( TemperatureScaleType.FAHRENHEIT );
+
+			Temperature = WeatherSystem.Temperature;
+			MinTemperature = -100;
+			MaxTemperature = 150;
+			*/
+		}
+
+		private WeatherType ConvertWeatherType()
+		{
+			WeatherType _weather_type = WeatherType.UNDEFINED;
+				/*
+				if( WeatherSystem.Sky. != WeatherMakerPrecipitationType.None && WeatherSystem.PrecipitationIntensity > 0.75 )
+			_weather_type = WeatherType.HEAVY_RAIN;
+			else if( WeatherSystem.Precipitation != WeatherMakerPrecipitationType.None && WeatherSystem.PrecipitationIntensity > 0.25 )
+			_weather_type = WeatherType.RAIN;
+			else if( WeatherSystem.Clouds != WeatherMakerCloudType.Heavy )
+			_weather_type = WeatherType.MOSTLY_CLOUDY;
+			else if( WeatherSystem.Clouds != WeatherMakerCloudType.Medium )
+			_weather_type = WeatherType.CLOUDY;
+			else if( WeatherSystem.Clouds != WeatherMakerCloudType.Light )
+			_weather_type = WeatherType.PARTLY_CLOUDY;
+			else if( WeatherSystem.Clouds != WeatherMakerCloudType.Storm )
+			_weather_type = WeatherType.STORMY;
+			else if( WeatherSystem.WindScript != null && WeatherSystem.WindScript.WindIntensity > 0.25f )
+			_weather_type = WeatherType.WINDY;
+			else if( WeatherSystem.FogScript != null && WeatherSystem.FogScript.FogDensity > 0.25f  )
+			_weather_type = WeatherType.FOGGY;
+			else*/
+			_weather_type = WeatherType.CLEAR;
+
+			return _weather_type;
+		}
+	}
+#elif ICE_WEATHER_MAKER
 	public class ICEWorldEnvironmentAdapter : ICEWorldEnvironment 
 	{
 		private WeatherMakerScript m_WeatherSystem = null;

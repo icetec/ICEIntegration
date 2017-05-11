@@ -46,7 +46,7 @@ namespace ICE.Integration.Menus
 
 		[MenuItem ( "ICE/ICE Integration/Environment/Create Environment Adapter", true)]
 		static bool ValidateEnvironmentAdapter(){
-			#if ICE_UNISTORM || ICE_TENKOKU || ICE_WEATHER_MAKER
+			#if ICE_UNISTORM || ICE_TENKOKU || ICE_WEATHER_MAKER || ICE_ENVIRO
 			return true;
 			#else
 			return false;
@@ -67,7 +67,7 @@ namespace ICE.Integration.Menus
 
 		[MenuItem ( "ICE/ICE Integration/Environment/Remove Environment Adapter", true)]
 		static bool ValidateRemoveEnvironmentAdapter(){
-			#if ICE_UNISTORM || ICE_TENKOKU || ICE_WEATHER_MAKER
+			#if ICE_UNISTORM || ICE_TENKOKU || ICE_WEATHER_MAKER || ICE_ENVIRO
 			return true;
 			#else
 			return false;
