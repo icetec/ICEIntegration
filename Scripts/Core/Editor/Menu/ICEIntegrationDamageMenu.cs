@@ -51,7 +51,7 @@ namespace ICE.Integration.Menus
 
 		[MenuItem ( "ICE/ICE Integration/Damage/Add Damage Adapters", true)]
 		static bool ValidateAddDamageAdapters(){
-			#if ICE_UNITZ || ICE_UFPS || ICE_OPSIVE_TPC || ICE_EASY_WEAPONS || ICE_ULTIMATE_SURVIVAL
+			#if ICE_UNITZ || ICE_UFPS || ICE_RFPSP || ICE_INVECTOR_TPC || ICE_OPSIVE_TPC || ICE_EASY_WEAPONS || ICE_ULTIMATE_SURVIVAL
 			return true;
 			#else
 			return false;
@@ -76,7 +76,7 @@ namespace ICE.Integration.Menus
 
 		[MenuItem ( "ICE/ICE Integration/Damage/Remove Damage Adapters", true)]
 		static bool ValidateRemoveDamageAdapters(){
-			#if ICE_UNITZ || ICE_UFPS || ICE_OPSIVE_TPC || ICE_EASY_WEAPONS || ICE_ULTIMATE_SURVIVAL  
+			#if ICE_UNITZ || ICE_UFPS || ICE_RFPSP || ICE_INVECTOR_TPC || ICE_OPSIVE_TPC || ICE_EASY_WEAPONS || ICE_ULTIMATE_SURVIVAL  
 			return true;
 			#else
 			return false;
