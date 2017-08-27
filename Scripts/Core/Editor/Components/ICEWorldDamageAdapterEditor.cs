@@ -60,6 +60,7 @@ namespace ICE.Integration.Adapter
 			GUI.backgroundColor = ICEEditorLayout.DefaultBackgroundColor;
 			EditorGUI.EndDisabledGroup();*/
 			#elif ICE_UMMORPG
+			_adapter.DamagePopupPrefab = (GameObject)EditorGUILayout.ObjectField( "Damage Popup Prefab", _adapter.DamagePopupPrefab, typeof(GameObject), true );
 			#else
 			#endif
 		}

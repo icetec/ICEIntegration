@@ -14,6 +14,7 @@
 
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 using ICE;
 using ICE.World;
@@ -30,11 +31,22 @@ using Opsive.ThirdPersonController;
 using Invector;
 #elif ICE_ULTIMATE_SURVIVAL
 using UltimateSurvival;
+#elif ICE_TPMC
+using com.ootii.Actors.AnimationControllers;
+using com.ootii.Actors.Attributes;
+using com.ootii.Actors.Combat;
+using com.ootii.Data.Serializers;
+using com.ootii.Helpers;
+using com.ootii.Messages;
+using com.ootii.Utilities;
+using com.ootii.Actors.LifeCores;
 #endif
 
 namespace ICE.Integration.Adapter
 {
 #if ICE_INVECTOR_TPC 
+	#region INVECTOR TPC ADAPTER
+
 	public class ICEWorldDamageAdapter : vCharacter 
 	{
 		protected ICEWorldEntity m_Entity = null;
@@ -89,7 +101,10 @@ namespace ICE.Integration.Adapter
 		}
 	}
 
+	#endregion
 #elif ICE_OPSIVE_TPC 
+	#region OPSIVE TPC ADAPTER
+
 	public class ICEWorldDamageAdapter : Health 
 	{
 		protected ICEWorldEntity m_Entity = null;
@@ -132,7 +147,11 @@ namespace ICE.Integration.Adapter
 				base.Die( _position, _force, _attacker );
 		}
 	}
+
+	#endregion
 #elif ICE_UFPS
+	#region UFPS ADAPTER
+
 	public class ICEWorldDamageAdapter : vp_DamageHandler {
 
 		protected ICEWorldEntity m_Entity = null;
@@ -195,7 +214,7 @@ namespace ICE.Integration.Adapter
 			if( Entity == null )
 				return;
 
-			Entity.Reset();
+			//Entity.Reset();
 
 			base.Reset();
 
@@ -238,15 +257,22 @@ namespace ICE.Integration.Adapter
 				base.DieBySources( sourceAndOriginalSource );	
 		}
 	}
+
+	#endregion
 #elif ICE_RFPSP
+	#region RFPSP ADAPTER
+
 	public class ICEWorldDamageAdapter : ICEWorldBehaviour
 	{
 		// IMPORTANT: this overrides the EntityDamageConverter.DoHandleDamage method with the 
 		// customized damage method and allows to use the original damage handler of the asset.
 		private DamageConverter _dc = new DamageConverter();
 	}
+
+	#endregion
 #elif ICE_UNITZ
-	[RequireComponent(typeof(ICEWorldEntity))]
+	#region UNITZ ADAPTER
+
 	public class ICEWorldDamageAdapter : DamageManager {
 
 		protected ICEWorldEntity m_Entity = null;
@@ -272,8 +298,11 @@ namespace ICE.Integration.Adapter
 		}
 
 	}
+
+	#endregion
 #elif ICE_EASY_WEAPONS
-	[RequireComponent(typeof(ICEWorldEntity))]
+	#region EASY WEAPONS ADAPTER
+
 	public class ICEWorldDamageAdapter : ICEWorldBehaviour {
 
 		protected ICEWorldEntity m_Entity = null;
@@ -293,9 +322,10 @@ namespace ICE.Integration.Adapter
 			Entity.ApplyDamage( _damage * (-1) );
 		}
 	}
-#elif ICE_ULTIMATE_SURVIVAL
 
-	[RequireComponent(typeof(ICEWorldEntity))]
+	#endregion
+#elif ICE_ULTIMATE_SURVIVAL
+	#region ULTIMATE SURVIVAL ADAPTER
 	public class ICEWorldDamageAdapter : EntityBehaviour, IDamageable 
 	{
 		protected ICEWorldEntity m_AttachedEntity = null;
@@ -398,7 +428,9 @@ namespace ICE.Integration.Adapter
 			return true;
 		}
 	}*/
+	#endregion
 #elif ICE_UMMORPG
+	#region UMMORPG ADAPTER
 
 	using UnityEngine.Networking;
 
@@ -409,6 +441,16 @@ namespace ICE.Integration.Adapter
 		public ICEWorldEntity AttachedEntity{
 			get{ return m_AttachedEntity = ( m_AttachedEntity == null ? ICEWorldEntity.GetWorldEntity( this.gameObject ) : m_AttachedEntity ); }
 		}
+
+		public ICE.Creatures.ICECreatureControl AttachedCreature{
+			get{ return AttachedEntity as ICE.Creatures.ICECreatureControl; }
+		}
+			
+		public GameObject DamagePopupPrefab{
+			get{ return base.damagePopupPrefab; }
+			set{ base.damagePopupPrefab = value; }
+		}
+
 
 		public override int healthMax { get { return (int)AttachedEntity.Status.InitialDurabilityMax; } }
 
@@ -431,15 +473,62 @@ namespace ICE.Integration.Adapter
 		[SerializeField] float moveDistance = 10;
 
 
-		[Server]
-		protected override string UpdateServer() {
-			return "IDLE";
+		// IMPORTANT: this overrides the EntityDamageConverter.DoHandleDamage method with the 
+		// customized damage method and allows to use the original damage handler of the asset.
+		private DamageConverter _dc = new DamageConverter();
+
+		void Start()
+		{
 		}
 
-		// finite state machine - client ///////////////////////////////////////////
-		[Client]
-		protected override void UpdateClient() {
+		void OnEnable()
+		{
+			base.health = (int)AttachedEntity.Status.Durability;
+		}
 
+		void OnDisable()
+		{
+			base.health = (int)AttachedEntity.Status.Durability;
+		}
+
+		void Update()
+		{
+			if( (int)AttachedEntity.Status.Durability > base.health )
+			{
+				float _damage = Mathf.Floor( AttachedEntity.Status.Durability - (float)base.health );
+				AttachedEntity.ApplyDamage( _damage );
+			}
+			else
+				base.health = (int)AttachedEntity.Status.Durability;
+
+			if( AttachedCreature != null && AttachedCreature.ActiveTargetGameObject != null )
+				target = AttachedCreature.ActiveTargetGameObject.GetComponentInParent<Entity>();
+		}
+
+		public override void OnStartServer() {
+			// call Entity's OnStartServer
+			base.OnStartServer();
+
+			// all monsters should spawn with full health and mana
+			health = healthMax;
+			mana = manaMax;
+
+		}
+
+		[Server]
+		protected override string UpdateServer() 
+		{
+			if( AttachedCreature != null )
+				return AttachedCreature.BehaviourModeKey;
+			else
+				return "IDLE";
+		}
+			
+		[Client]
+		protected override void UpdateClient() 
+		{
+			if( AttachedCreature != null )
+				AttachedCreature.BehaviourModeKey = state;
 		}
 
 		// aggro ///////////////////////////////////////////////////////////////////
@@ -447,18 +536,99 @@ namespace ICE.Integration.Adapter
 		[ServerCallback]
 		public override void OnAggro(Entity entity) {
 
-			Debug.Log( "AGGRO");
+			//Debug.Log( "AGGRO");
 		}
 
-		// skills //////////////////////////////////////////////////////////////////
-		// monsters always have a weapon
+		[ClientCallback] 
+		void LateUpdate() {
+
+
+		}
+			
 		public override bool HasCastWeapon() { return true; }
-
-		// monsters can only attack players
-		public override bool CanAttackType(System.Type type) {
-			return type == typeof(Player);
-		}
+		public override bool CanAttackType(System.Type type) { return true; }
 	}
+
+
+	#endregion
+#elif ICE_TPMC
+	#region TPMC ADAPTER
+	public class ICEWorldDamageAdapter : ICEWorldBehaviour, IDamageable 
+	{
+		protected ICEWorldEntity m_AttachedEntity = null;
+		public ICEWorldEntity AttachedEntity{
+			get{ return m_AttachedEntity = ( m_AttachedEntity == null ? ICEWorldEntity.GetWorldEntity( this.gameObject ) : m_AttachedEntity ); }
+		}
+
+		// IMPORTANT: this overrides the EntityDamageConverter.DoHandleDamage method with the 
+		// customized damage method and allows to use the original damage handler of the asset.
+		private DamageConverter _dc = new DamageConverter();
+
+		public virtual bool OnDamaged( DamageMessage _msg )
+		{
+			if( AttachedEntity == null || AttachedEntity.Status.IsDestroyed )
+				return true;
+			
+			/*
+			if (!IsAlive) { return true; }
+
+			float lRemainingHealth = 0f;
+			if (AttributeSource != null)
+			{
+				if (rMessage is DamageMessage)
+				{
+					lRemainingHealth = AttributeSource.GetAttributeValue<float>(HealthID) - ((DamageMessage)rMessage).Damage;
+					AttributeSource.SetAttributeValue(HealthID, lRemainingHealth);
+				}
+			}
+
+			if (lRemainingHealth <= 0f)
+			{
+				OnKilled(rMessage);
+			}
+			else if (rMessage != null)
+			{
+				bool lPlayAnimation = true;
+				if (rMessage is DamageMessage) { lPlayAnimation = ((DamageMessage)rMessage).AnimationEnabled; }
+
+				if (lPlayAnimation)
+				{
+					MotionController lMotionController = gameObject.GetComponent<MotionController>();
+					if (lMotionController != null)
+					{
+						// Send the message to the MC to let it activate
+						rMessage.ID = CombatMessage.MSG_DEFENDER_DAMAGED;
+						lMotionController.SendMessage(rMessage);
+					}
+
+					if (!rMessage.IsHandled && DamagedMotion.Length > 0)
+					{
+						MotionControllerMotion lMotion = null;
+						if (lMotionController != null) { lMotion = lMotionController.GetMotion(DamagedMotion); }
+
+						if (lMotion != null)
+						{
+							lMotionController.ActivateMotion(lMotion);
+						}
+						else
+						{
+							int lID = Animator.StringToHash(DeathMotion);
+							if (lID != 0)
+							{
+								Animator lAnimator = gameObject.GetComponent<Animator>();
+								if (lAnimator != null) { lAnimator.CrossFade(DamagedMotion, 0.25f, 0); }
+							}
+						}
+					}
+				}
+			}
+*/
+			return true;
+		}
+
+	}
+
+	#endregion
 #else
 	public class ICEWorldDamageAdapter : ICEWorldBehaviour{}
 #endif

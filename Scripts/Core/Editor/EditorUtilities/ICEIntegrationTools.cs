@@ -55,6 +55,7 @@ namespace ICE.Integration.Menus
 			new AssetDefine("GenericVitals.cs", "namespace UltimateSurvival", true, null, "ICE_ULTIMATE_SURVIVAL" ),
 			new AssetDefine("Entity.cs", "", true, null, "ICE_UMMORPG" ),
 			new AssetDefine("vCharacter.cs", "namespace Invector", true, null, "ICE_INVECTOR_TPC" ),
+			new AssetDefine("IDamageable.cs", "namespace com.ootii.Actors.LifeCores", true, null, "ICE_TPMC" ),
 
 			// NETWORKING
 			new AssetDefine("PhotonNetwork.cs", "", true, null, "ICE_PUN" ),

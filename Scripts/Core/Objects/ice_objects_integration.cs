@@ -25,6 +25,12 @@ using ICE.World.EnumTypes;
 
 #if ICE_INVECTOR_TPC
 using Invector.EventSystems;
+#elif ICE_TPMC
+using com.ootii.Actors.Combat;
+using com.ootii.Geometry;
+using com.ootii.Graphics;
+using com.ootii.Helpers;
+using com.ootii.Actors.LifeCores;
 #endif
 
 namespace ICE.Integration.Objects
@@ -56,6 +62,10 @@ namespace ICE.Integration.Objects
 				_handled = TryEasyWeaponsDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#elif ICE_ULTIMATE_SURVIVAL
 				_handled = TryUltimateSurvivalDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
+			#elif ICE_UMMORPG
+				_handled = TryUMMORPGDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
+			#elif ICE_TPMC
+				_handled = TryTPMCDamage( _sender, _target, _impact_type, _damage, _damage_method, _damage_point, _force_type, _force );
 			#endif
 		
 			return _handled;
@@ -258,6 +268,8 @@ namespace ICE.Integration.Objects
 			else if ( _target.CanReceiveDamage())
 				_target.ApplyDamage( _damage_obj );
 
+			_damage_obj = null;
+
 			_handled = true;
 
 			#endif
@@ -361,7 +373,7 @@ namespace ICE.Integration.Objects
 		{
 			if( _target == null || _sender == null || _target == _sender )
 				return false;
-
+			
 			bool _handled = false;
 
 			#if ICE_ULTIMATE_SURVIVAL
@@ -376,6 +388,88 @@ namespace ICE.Integration.Objects
 				_damageable.ReceiveDamage( _health_event_data );
 			else if( _victim != null )
 				_victim.ChangeHealth.Try( _health_event_data );
+
+			#endif
+
+			return _handled;
+		}
+
+		/// <summary>
+		/// Tries to handle UMMORPG damage.
+		/// </summary>
+		/// <returns><c>true</c>, if UMMORPG damage was tryed, <c>false</c> otherwise.</returns>
+		/// <param name="_sender">Sender.</param>
+		/// <param name="_target">Target.</param>
+		/// <param name="_impact_type">Impact type.</param>
+		/// <param name="_damage">Damage.</param>
+		/// <param name="_damage_method">Damage method.</param>
+		/// <param name="_damage_point">Damage point.</param>
+		/// <param name="_force_type">Force type.</param>
+		/// <param name="_force">Force.</param>
+		private static bool TryUMMORPGDamage( GameObject _sender, GameObject _target, DamageTransferType _impact_type, float _damage, string _damage_method, Vector3 _damage_point, DamageForceType _force_type, float _force )
+		{
+			if( _target == null || _sender == null || _target == _sender )
+				return false;
+
+			bool _handled = false;
+
+			#if ICE_UMMORPG
+
+			Entity _attacker = _sender.GetComponentInParent<Entity>();
+			Entity _victim = _target.GetComponentInParent<Entity>();
+
+			if( _attacker != null )
+				_attacker.DealDamageAt( _victim, (int)_damage, 0 );
+
+			#endif
+
+			return _handled;
+		}
+
+		/// <summary>
+		/// Tries to handle TPMC damage.
+		/// </summary>
+		/// <returns><c>true</c>, if TPMC damage was tryed, <c>false</c> otherwise.</returns>
+		/// <param name="_sender">Sender.</param>
+		/// <param name="_target">Target.</param>
+		/// <param name="_impact_type">Impact type.</param>
+		/// <param name="_damage">Damage.</param>
+		/// <param name="_damage_method">Damage method.</param>
+		/// <param name="_damage_point">Damage point.</param>
+		/// <param name="_force_type">Force type.</param>
+		/// <param name="_force">Force.</param>
+		private static bool TryTPMCDamage( GameObject _sender, GameObject _target, DamageTransferType _impact_type, float _damage, string _damage_method, Vector3 _damage_point, DamageForceType _force_type, float _force )
+		{
+			if( _target == null || _sender == null || _target == _sender )
+				return false;
+
+			bool _handled = false;
+
+			#if ICE_TPMC
+
+			IWeaponCore _weapon = _sender.GetComponent<IWeaponCore>();
+			if( _weapon == null )
+				_weapon = _sender.GetComponentInChildren<IWeaponCore>();
+
+			IDamageable _damageable = _target.GetComponent<IDamageable>();
+
+			if( _damageable == null )
+				return false;
+
+			CombatMessage _msg = CombatMessage.Allocate();
+			_msg.ID = CombatMessage.MSG_ATTACKER_ATTACKED;
+			_msg.Attacker = _sender;
+			_msg.Defender = _target;
+			_msg.Weapon = _weapon;
+			_msg.CombatStyle = null;// (lAttacker != null ? lAttacker.CombatStyle : null);
+			_msg.Damage = _damage;
+			_msg.ImpactPower = _force;
+			_msg.HitPoint = _damage_point;
+			_msg.HitDirection = Quaternion.Inverse(_target.transform.rotation) * ( _damage_point - _target.transform.position ).normalized;;
+			_msg.HitVector = Vector3.zero;
+			_msg.HitTransform = _target.transform;
+
+			_damageable.OnDamaged( _msg );
 
 			#endif
 

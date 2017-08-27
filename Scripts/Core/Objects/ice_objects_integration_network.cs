@@ -250,7 +250,7 @@ namespace ICE.Integration.Objects
 				return;
 
 			Color _color = Color.Lerp( ImageMaster.color, m_TargetStatusColor, 0.1f );
-			_color.a = ( ICEWorldInfo.IsMasterClient ? 1 : 0.25f );
+			_color.a = ( ICEWorldInfo.IsServer ? 1 : 0.25f );
 			ImageMaster.color = _color;
 		}
 	}

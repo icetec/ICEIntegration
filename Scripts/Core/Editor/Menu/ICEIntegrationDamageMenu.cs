@@ -270,5 +270,60 @@ namespace ICE.Integration.Menus
 			#endif
 		}
 		#endif
+
+		#if ICE_UMMORPG
+		[MenuItem ( "ICE/ICE Integration/Damage/UMMORPG/Adapt UMMORPG Scripts", false, 8033 )]
+		static void AdaptUMMORPGScripts() 
+		{
+			{
+				string _text = File.ReadAllText("Assets/uMMORPG/Scripts/Entity.cs");
+				if( ! _text.Contains( "BEGIN ICE DAMAGE - MODIFIED BY ICE" ) )
+				{
+					string _search_str = "[SerializeField] GameObject damagePopupPrefab;";
+					int _start_pos = _text.IndexOf( _search_str );
+					if( _start_pos > 0 )
+					{
+						string _insert_str = "" +
+							"//[SerializeField] GameObject damagePopupPrefab;" +
+							"\n\t// BEGIN ICE DAMAGE - MODIFIED BY ICE" +
+							"\n\t[SerializeField] protected GameObject damagePopupPrefab;" +
+							"\n\t// END ICE DAMAGE - MODIFIED BY ICE" +
+							"\n";
+						_text = _text.Replace( _search_str, _insert_str );
+
+						Debug.Log( "Insert ICE damage handling in Assets/uMMORPG/Scripts/Entity.cs"  ); 
+						File.WriteAllText( "Assets/uMMORPG/Scripts/Entity.cs", _text );
+					}
+				}
+				else
+					Debug.Log( "ICE damage handling already exists in Assets/uMMORPG/Scripts/Entity.cs"  );
+			}
+
+			{
+				string _text = File.ReadAllText("Assets/uMMORPG/Scripts/Player.cs");
+				if( ! _text.Contains( "BEGIN ICE DAMAGE - MODIFIED BY ICE" ) )
+				{
+					string _search_str = "return type == typeof(Monster) || type == typeof(Player);";
+					int _start_pos = _text.IndexOf( _search_str );
+					if( _start_pos > 0 )
+					{
+						string _insert_str = "" +
+							"//return type == typeof(Monster) || type == typeof(Player);" +
+							"\n\t\t\t// BEGIN ICE DAMAGE - MODIFIED BY ICE" +
+							"\n\t\t\t// players can attack players and monsters and ICE entities" +
+							"\n\t\t\treturn type == typeof(Monster) || type == typeof(Player) || type == typeof(ICE.Integration.Adapter.ICEWorldDamageAdapter);" +
+							"\n\t\t\t// END ICE DAMAGE - MODIFIED BY ICE" +
+							"\n\t\t\t";
+						_text = _text.Replace( _search_str, _insert_str );
+
+						Debug.Log( "Insert ICE damage handling in Assets/uMMORPG/Scripts/Player.cs"  ); 
+						File.WriteAllText( "Assets/uMMORPG/Scripts/Player.cs", _text );
+					}
+				}
+				else
+					Debug.Log( "ICE damage handling already exists in Assets/uMMORPG/Scripts/Player.cs"  );
+			}
+		}
+		#endif
 	}
 }

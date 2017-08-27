@@ -34,6 +34,7 @@ namespace ICE.Integration.EditorInfos
 		public static readonly string SYNC_MOVEMENTS_SMOOTHING = "";
 
 		public static readonly string SYNC_STATUS = "";
+		public static readonly string OBSERVE_OPTION = "";
 	}
 }
 
